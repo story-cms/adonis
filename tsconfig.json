@@ -11,5 +11,6 @@
       "@adonisjs/auth",
       "@adonisjs/lucid"
     ]
-  }
+  },
+  "exclude": ["build/*", "node_modules/*"]
 }
