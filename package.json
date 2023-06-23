@@ -2,7 +2,27 @@
   "name": "@story-cms/adonis",
   "version": "0.0.1",
   "description": "Story CMS package for the Adonisjs framework",
-  "main": "build/providers/StoryProvider.js",
+  "main": "./build/providers/StoryProvider.js",
+  "typings": "./build/adonis-typings/index.d.ts",
+  "files": [
+    "build/adonis-typings",
+    "build/providers",
+    "build/src",
+    "build/instructions.js",
+    "build/templates"
+  ],
+  "adonisjs": {
+    "instructionsMd": "./build/instructions.md",
+    "types": "@story-cms/adonis",
+    "providers": [
+      "@story-cms/adonis"
+    ],
+    "templates": {
+      "config": [
+        "story.txt"
+      ]
+    }
+  },
   "scripts": {
     "lint": "tsc --noEmit && eslint . --ext=ts",
     "lint:fix": "eslint . --ext=ts --fix",
@@ -54,10 +74,5 @@
     "probotApps": [],
     "runGhActionsOnWindows": false
   },
-  "files": [
-    "build/src",
-    "build/index.d.ts",
-    "build/index.js"
-  ],
   "prettier": "@onesheep/prettier-config"
 }

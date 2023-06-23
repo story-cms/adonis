@@ -1,0 +1,57 @@
+/**
+ * Config source: <https://github.com/story-cms/adonis/blob/main/templates/story.txt>
+ *
+ * Feel free to let us know via PR, if you find something broken in this config
+ * file.
+ */
+import { StoryConfig } from '@ioc:StoryCms/Core';
+
+/*
+|--------------------------------------------------------------------------
+| Story
+|--------------------------------------------------------------------------
+|
+| This is the main configuration for the CMS instance where we define 
+| the following things:
+|
+| - site meta data
+| - content shape
+| - infomation pages
+| 
+*/
+export const storyConfig: StoryConfig = {
+   meta: {
+    name: 'Story CMS',
+    storyType: 'Edition',
+    chapterType: 'Devotion',
+    logo: 'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
+  },
+
+  hasEditReview: false,
+
+  // https://en.wikipedia.org/wiki/IETF_language_tag
+  // https://r12a.github.io/app-subtags/
+  languages: [
+    {
+      locale: 'en',
+      language: 'English',
+      languageDirection: 'ltr',
+    },
+  ],
+
+  schemaVersion: 1,
+
+  stories: [
+    {
+      id: 1,
+      name: 'Classic',
+      fields: baseFields,
+      chapterLimit: 12,
+    },
+  ],
+
+  pages: {
+    schemaVersion: 1,
+    tracking: 'utm_source=bioyapp&utm_medium=referral&utm_campaign=page_menu',
+  },
+}
