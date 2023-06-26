@@ -12,25 +12,22 @@
     "build/templates"
   ],
   "adonisjs": {
-    "instructionsMd": "./build/instructions.md",
+    "instructions": "./build/instructions.js",
     "types": "@story-cms/adonis",
     "providers": [
       "@story-cms/adonis"
-    ],
-    "templates": {
-      "config": [
-        "story.txt"
-      ]
-    }
+    ]
   },
   "scripts": {
     "lint": "tsc --noEmit && eslint . --ext=ts",
     "lint:fix": "eslint . --ext=ts --fix",
+    "copy:instructions_md": "copyfiles \"instructions.md\" build",
+    "copy:files": "copyfiles \"templates/**/*.txt\" build && npm run copy:instructions_md",
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
     "test": "node -r @adonisjs/require-ts/build/register bin/test.ts",
     "clean": "del-cli build",
-    "compile": "npm run clean && tsc",
+    "compile": "npm run clean && tsc && npm run copy:files",
     "build": "npm run compile",
     "prepublishOnly": "npm run build"
   },
@@ -57,7 +54,9 @@
     "@adonisjs/mrm-preset": "^5.0.3",
     "@adonisjs/require-ts": "^2.0.13",
     "@adonisjs/session": "^6.4.0",
+    "@adonisjs/sink": "^5.4.3",
     "@onesheep/prettier-config": "^0.0.12",
+    "@poppinss/dev-utils": "^2.0.3",
     "@types/node": "^20.3.1",
     "del-cli": "^5.0.0",
     "eslint": "^8.43.0",
@@ -74,5 +73,8 @@
     "probotApps": [],
     "runGhActionsOnWindows": false
   },
-  "prettier": "@onesheep/prettier-config"
+  "prettier": "@onesheep/prettier-config",
+  "dependencies": {
+    "copyfiles": "^2.4.1"
+  }
 }

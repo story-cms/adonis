@@ -1,0 +1,62 @@
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
+
+interface IndexItem {
+  number: number;
+  imageUrl: string;
+  title: string;
+  reference: string;
+  part: number;
+}
+
+interface IndexItems {
+  root: Array<IndexItem>;
+}
+
+export default class Index extends BaseModel {
+  @column({ isPrimary: true })
+  public id: number;
+
+  @column()
+  public apiVersion: number;
+
+  @column()
+  public locale: string;
+
+  @column()
+  public items: IndexItems;
+
+  @column()
+  public publishedList: Array<number>;
+
+  @column()
+  public draftsList: Array<number>;
+
+  @column()
+  public issuesList: Array<number>;
+
+  @column()
+  public storyId: number;
+
+  @column.dateTime({ autoCreate: true })
+  public createdAt: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public updatedAt: DateTime;
+
+  public get list() {
+    return this.items.root;
+  }
+
+  public get publicList() {
+    return this.items.root.filter((item) =>
+      this.publishedList.some((tag) => item.number === tag),
+    );
+  }
+
+  public sortItems() {
+    this.items.root.sort(function (a, b) {
+      return a.number - b.number;
+    });
+  }
+}

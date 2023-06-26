@@ -1,0 +1,61 @@
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
+import { IndexItem, Specifier, Version } from '@story-cms/ui';
+export default class Draft extends BaseModel {
+  @column({ isPrimary: true })
+  public id: number;
+
+  @column()
+  public apiVersion: number;
+
+  @column()
+  public locale: string;
+
+  @column()
+  public number: number;
+
+  @column()
+  public bundle: string;
+
+  @column()
+  public storyId: number;
+
+  @column()
+  public feedback: string;
+
+  @column()
+  public status: string;
+
+  @column.dateTime({ autoCreate: true })
+  public createdAt: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public updatedAt: DateTime;
+
+  public get index(): IndexItem {
+    return {
+      number: this.number,
+      title: this.bundle['title'],
+      imageUrl: this.bundle['imageUrl'],
+      part: this.bundle['part'],
+      reference: this.bundle['passage']?.['reference'] ?? '',
+    };
+  }
+
+  public get specifier(): Specifier {
+    return {
+      storyId: this.storyId,
+      locale: this.locale,
+      apiVersion: this.apiVersion,
+      number: this.number,
+    };
+  }
+
+  public get version(): Version {
+    return {
+      storyId: this.storyId,
+      locale: this.locale,
+      apiVersion: this.apiVersion,
+    };
+  }
+}

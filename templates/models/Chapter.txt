@@ -1,0 +1,51 @@
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
+import { IndexItem, Specifier } from '@story-cms/ui';
+
+export default class Chapter extends BaseModel {
+  @column({ isPrimary: true })
+  public id: number;
+
+  @column()
+  public apiVersion: number;
+
+  @column()
+  public locale: string;
+
+  @column()
+  public number: number;
+
+  @column()
+  public bundle: string;
+
+  @column()
+  public updatedBy: number;
+
+  @column()
+  public storyId: number;
+
+  @column.dateTime({ autoCreate: true })
+  public createdAt: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public updatedAt: DateTime;
+
+  public get index(): IndexItem {
+    return {
+      number: this.number,
+      title: this.bundle['title'],
+      imageUrl: this.bundle['imageUrl'],
+      part: this.bundle['part'],
+      reference: this.bundle['passage']?.['reference'] ?? '',
+    };
+  }
+
+  public get specifier(): Specifier {
+    return {
+      apiVersion: this.apiVersion,
+      locale: this.locale,
+      number: this.number,
+      storyId: this.storyId,
+    };
+  }
+}
