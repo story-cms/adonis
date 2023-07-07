@@ -1,0 +1,50 @@
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Chapter from 'App/Models/Chapter'
+import { storyConfig } from 'Config/story'
+import ChapterService from 'App/Services/ChapterService'
+import View from '@ioc:Adonis/Core/View'
+
+export default class ChaptersController {
+  public async preview({ request, params, inertia }: HttpContextContract) {
+    const version = request.all().version
+    const story = request.all().story
+
+    const specifier = {
+      apiVersion: version.apiVersion,
+      locale: version.locale,
+      storyId: story.id,
+      number: Number(params.number),
+    }
+    const chapter = await Chapter.query().where(specifier).firstOrFail()
+    const bundleView = await View.render('preview', {
+      bundle: chapter.bundle,
+    })
+
+    return inertia.render('ChapterPreview', {
+      chapter: chapter,
+      bundleView: bundleView,
+    })
+  }
+
+  public async get({ request, params, response }: HttpContextContract) {
+    const locale = request.qs()['locale'] || 'en'
+    const mediaLocale = request.qs()['media'] || locale
+    const storylabel = request.qs()['story'] || storyConfig.stories[0].name
+
+    const story = storyConfig.stories.find((s) => s.name === storylabel)
+    if (!story) return response.notFound()
+
+    const specifier = {
+      storyId: story!.id,
+      apiVersion: storyConfig.schemaVersion,
+      locale: locale,
+      number: Number(params.number),
+    }
+
+    const chapter = await Chapter.query().where(specifier).firstOrFail()
+    const service = new ChapterService(chapter)
+    const shaped = await service.withMediaChange(mediaLocale)
+
+    return { number: chapter.number, bundle: shaped.bundle }
+  }
+}

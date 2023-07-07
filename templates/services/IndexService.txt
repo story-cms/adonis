@@ -1,0 +1,151 @@
+import Chapter from 'App/Models/Chapter';
+import Draft from 'App/Models/Draft';
+import Index from 'App/Models/Index';
+import { IndexItem, Version, IndexReadyItem, Story, Part } from '@story-cms/ui';
+
+export default class IndexService {
+  public story: Story;
+  public config: Object;
+
+  constructor(story: Story) {
+    this.story = story;
+  }
+
+  public async buildIndex(version: Version) {
+    const index = await Index.firstOrCreate(version, {
+      items: { root: <IndexItem[]>[] },
+    });
+
+    const drafts = await Draft.query().where(version);
+    const published = await Chapter.query().where(version);
+
+    // assemble the items
+    const items = { root: <IndexItem[]>[] };
+    published.forEach((chapter) => items.root.push(chapter.index));
+    drafts.forEach((draft) => {
+      if (items.root.some((item) => item.number === draft.number)) return;
+      items.root.push(draft.index);
+    });
+
+    index.items = items;
+    index.sortItems();
+
+    // build the tag lists
+    const issues = await Draft.query().where(version).andWhereNotNull('feedback');
+    index.draftsList = drafts.map((draft) => draft.number);
+    index.publishedList = published.map((chapter) => chapter.number);
+    index.issuesList = issues.map((draft) => draft.number);
+
+    await index.save();
+  }
+
+  public async updateTags(index: Index) {
+    const scope = {
+      storyId: index.storyId,
+      locale: index.locale,
+      apiVersion: index.apiVersion,
+    };
+
+    index.draftsList =
+      (await Draft.query().where(scope))?.map((draft) => draft.number) || [];
+    index.publishedList =
+      (await Chapter.query().where(scope))?.map((row) => row.number) || [];
+    index.issuesList =
+      (await Draft.query().where(scope).andWhereNotNull('feedback'))?.map(
+        (row) => row.number,
+      ) || [];
+
+    await index.save();
+  }
+
+  public async getItems(version: Version): Promise<Array<IndexReadyItem>> {
+    const index = await Index.query().where(version).first();
+    if (!index) return [];
+
+    return index!.list.map((item) => {
+      let tags: string[] = [];
+      if (index.publishedList.some((i) => i === item.number)) tags.push('Live');
+      if (index.draftsList.some((i) => i === item.number)) tags.push('Draft');
+      if (index.issuesList.some((i) => i === item.number)) tags.push('Issues');
+      return {
+        ...item,
+        tags,
+      };
+    });
+  }
+
+  public async groupedIndex(version: Version): Promise<any[]> {
+    const index = await Index.query().where(version).firstOrFail();
+    if (!index) return [];
+
+    if (!this.story.parts) {
+      return index!.publicList;
+    }
+
+    const grouped = this.story.parts.map((part: Part) => ({
+      id: part.id,
+      title: part.title,
+      subtitle: part.subtitle,
+      description: part.description,
+      index: <any>[],
+    }));
+
+    index!.publicList.forEach((item) => {
+      const part = grouped.find((group) => group.id === item.part);
+      if (part)
+        part.index.push({
+          id: item.number,
+          title: item.title,
+          reference: item.reference,
+          imageUrl: item.imageUrl,
+        });
+    });
+
+    return grouped;
+  }
+
+  public async getCurrentApiVersion(): Promise<number> {
+    const rows = await Chapter.query().max('api_version');
+    return rows[0].$extras.max || 1;
+  }
+
+  public getDefaultStoryBundle(spec: Object[]): string {
+    const shapes = this.getBundleShapes(spec);
+    return `{${shapes}}`;
+  }
+
+  private getBundleShapes(spec: Object[]): string {
+    return (
+      spec
+        // .filter((widget) => widget.hasOwnProperty('name'))
+        .map((node) => {
+          return this.renderBundleShape(node);
+        })
+        .join(',')
+    );
+  }
+
+  private renderBundleShape(node: any): string {
+    if (node['widget'] === 'panel' && node['fields'])
+      return this.getBundleShapes(node['fields']);
+
+    if (node['widget'] === 'list' && node['fields']) return `"${node['name']}": []`;
+    // if (node['widget'] === 'list' && node['field']) return `TODO`;
+    if (node['widget'] === 'string') return `"${node['name']}": ""`;
+    if (node['widget'] === 'image') return `"${node['name']}": ""`;
+    if (node['widget'] === 'object')
+      return `"${node['name']}": ${this.renderObjectShape(node['fields'])}`;
+
+    return `"${node['name']}": ""`;
+  }
+
+  private renderObjectShape(node: any): string {
+    const items = Object.entries(node)
+      .map(([_, value]) => {
+        return this.renderBundleShape(value);
+      })
+      .join(',');
+
+    return `{${items}}`;
+  }
+}

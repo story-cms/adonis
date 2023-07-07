@@ -21,10 +21,10 @@ import { StoryConfig } from '@ioc:StoryCms/Core';
 */
 export const storyConfig: StoryConfig = {
    meta: {
-    name: 'Story CMS',
-    storyType: 'Edition',
-    chapterType: 'Devotion',
-    logo: 'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
+    name: '{{appName}}',
+    storyType: '{{storyType}}',
+    chapterType: '{{chapterType}}',
+    logo: '{{logoUrl}}',
   },
 
   hasEditReview: false,

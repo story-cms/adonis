@@ -1,0 +1,191 @@
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Database from '@ioc:Adonis/Lucid/Database';
+import Chapter from 'App/Models/Chapter';
+import Draft from 'App/Models/Draft';
+import IndexService from 'App/Services/IndexService';
+import StoryService from 'App/Services/StoryService';
+import BundleValidator from 'App/Validators/BundleValidator';
+
+export default class DraftsController {
+  public async create({ response, request }: HttpContextContract) {
+    const version = request.all().version;
+    const story = request.all().story;
+
+    const service = new IndexService(story);
+    const index = await service.getItems(version);
+    const number = index.length + 1;
+
+    if (index.length >= story.chapterLimit) return response.redirect('/');
+
+    const bundle = service.getDefaultStoryBundle(story.fields);
+
+    await Draft.create({
+      ...version,
+      number,
+      bundle,
+    });
+
+    return response.redirect(`/draft/${number}/edit`);
+  }
+
+  public async edit({ inertia, params, response, request, auth }: HttpContextContract) {
+    const version = request.all().version;
+    const story = request.all().story;
+
+    const specifier = {
+      apiVersion: version.apiVersion,
+      locale: version.locale,
+      storyId: story.id,
+      number: Number(params.number),
+    };
+
+    let draft = await Draft.query().where(specifier).first();
+    let lastPublished = '';
+
+    const chapter = await Chapter.query().where(specifier).first();
+
+    if (chapter) {
+      lastPublished = chapter.updatedAt ? chapter.updatedAt.toString() : '';
+    }
+
+    if (!draft) {
+      if (!chapter) {
+        return response.notFound();
+      }
+      lastPublished = chapter.updatedAt.toString();
+      draft = await Draft.create({
+        ...specifier,
+        bundle: chapter.bundle,
+      });
+    }
+
+    const service = new StoryService(story);
+    const indexService = new IndexService(story);
+    await indexService.buildIndex(version);
+
+    return inertia.render('DraftIndex', {
+      user: auth.user,
+      draft,
+      bundle: draft!.bundle,
+      spec: service.spec,
+      fields: service.spec.fields,
+      feedback: draft.feedback,
+      last_published: lastPublished,
+    });
+  }
+
+  // Only saving the draft without performing any validation
+  public async save({ request, response, params, session }: HttpContextContract) {
+    const story = request.all().story;
+
+    try {
+      const id = Number(params.id);
+      const draft = await Draft.findOrFail(id);
+
+      draft.bundle = request.input('bundle');
+      await draft.save();
+      const service = new IndexService(story);
+      await service.buildIndex(draft.version);
+    } catch (e) {
+      const errors = e.messages || e.message || 'Error while saving this draft. Sorry!';
+      session.flash('errors', errors);
+    }
+
+    return response.redirect().back();
+  }
+
+  public async submit(ctx: HttpContextContract) {
+    const story = ctx.request.all().story;
+
+    const id = Number(ctx.params.id);
+    const draft = await Draft.findOrFail(id);
+
+    let payload;
+    try {
+      const validator = new BundleValidator(ctx);
+      payload = await ctx.request.validate({
+        schema: validator.schema,
+        messages: validator.messages,
+      });
+    } catch (e) {
+      ctx.session.flash('errors', e.messages);
+      return ctx.response.redirect().back();
+    }
+
+    const service = new IndexService(story);
+
+    draft.bundle = JSON.stringify(payload.bundle);
+    draft.status = 'submitted';
+    draft.feedback = '';
+    await draft.save();
+    await service.buildIndex(draft.version);
+    return ctx.response.redirect().back();
+  }
+
+  public async reject({ request, response, params }: HttpContextContract) {
+    const id = Number(params.id);
+    const draft = await Draft.findOrFail(id);
+    draft.status = 'started';
+    draft.feedback = request.input('feedback');
+    await draft.save();
+    return response.redirect().back();
+  }
+
+  public async publish(ctx: HttpContextContract) {
+    const story = ctx.request.all().story;
+    const id = Number(ctx.params.id);
+    const draft = await Draft.findOrFail(id);
+
+    try {
+      const validator = new BundleValidator(ctx);
+      const payload = await ctx.request.validate({
+        schema: validator.schema,
+        messages: validator.messages,
+      });
+      draft.bundle = JSON.stringify(payload.bundle);
+    } catch (e) {
+      ctx.session.flash('errors', e.messages);
+      return ctx.response.redirect().back();
+    }
+
+    draft.bundle = ctx.request.input('bundle');
+    const version = { ...draft.version };
+
+    await Database.transaction(async (trx) => {
+      let chapter = await Chapter.query()
+        .where({ ...draft.specifier })
+        .first();
+
+      if (chapter === null) {
+        chapter = new Chapter().fill({ ...draft.specifier, bundle: draft.bundle });
+      } else {
+        chapter.bundle = draft.bundle;
+      }
+
+      chapter.useTransaction(trx);
+      draft.useTransaction(trx);
+      await chapter.save();
+      await draft.delete();
+    });
+
+    // update the index after the transaction
+    const service = new IndexService(story);
+    await service.buildIndex(version);
+
+    return ctx.response.redirect('/');
+  }
+
+  public async delete({ params, response, request }: HttpContextContract) {
+    const story = request.all().story;
+
+    const id = Number(params.id);
+    const draft = await Draft.findOrFail(id);
+
+    const version = { ...draft.version };
+    await draft.delete();
+    const service = new IndexService(story);
+    await service.buildIndex(version);
+
+    return response.redirect('/', false, 303);
+  }
+}

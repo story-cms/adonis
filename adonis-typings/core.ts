@@ -28,4 +28,12 @@ declare module '@ioc:StoryCms/Core' {
       tracking: string;
     };
   };
+
+  import { Specifier } from '@story-cms/ui';
+  import { BaseModel } from '@ioc:Adonis/Lucid/Orm';
+  export class Chapter extends BaseModel {
+    locale: string;
+    bundle: string;
+    specifier: Specifier;
+  }
 }

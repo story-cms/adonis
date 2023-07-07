@@ -27,13 +27,56 @@ export default async function instructions(
     hasEditReview: false,
   };
 
+  state.appName = await sink.getPrompt().ask('Enter the name of the app', {
+    default: state.appName,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
+  state.storyType = await sink.getPrompt().ask('Enter the story type', {
+    default: state.storyType,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
+  state.chapterType = await sink.getPrompt().ask('Enter the chapter type', {
+    default: state.chapterType,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
+  state.logoUrl = await sink.getPrompt().ask('Enter the url for the hosted app logo', {
+    default: state.logoUrl,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
   makeConfig(projectRoot, app, sink, state);
 
   // models
   makeModels(projectRoot, app, sink);
 
+  // services
+  makeServices(projectRoot, sink);
+
+  // validators
+  makeValidators(projectRoot, sink);
+
+  // controllers
+  makeControllers(projectRoot, app, sink);
+
   //migrations
   makeBaseMigrations(projectRoot, app, sink, state);
+
+  //commands
+  makeCommands(projectRoot, sink);
+
+  // exceptions
+  makeExceptions(projectRoot, app, sink);
 }
 
 function makeBaseMigrations(
@@ -54,8 +97,9 @@ function makeBaseMigrations(
       getStub(`migrations/${name}.txt`),
     );
 
-    if (hasMigrationFile(app, name)) {
-      sink.logger.action('create').skipped(`${migrationPath} file already exists`);
+    const file = migrationFile(app, name);
+    if (file != null) {
+      sink.logger.action('create').skipped(`${file} file already exists`);
       continue;
     }
 
@@ -65,6 +109,108 @@ function makeBaseMigrations(
 
   // remove existing users migration
   removeUsersMigration(app, sink);
+}
+
+function makeServices(projectRoot: string, sink: typeof sinkStatic) {
+  const entity = 'services';
+  const serviceNames = templateNames(entity);
+  const targetDirectory = 'app/Services';
+
+  for (const name of serviceNames) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeCommands(projectRoot: string, sink: typeof sinkStatic) {
+  const entity = 'commands';
+  const names = templateNames(entity);
+  const targetDirectory = 'commands';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeExceptions(
+  projectRoot: string,
+  app: ApplicationContract,
+  sink: typeof sinkStatic,
+) {
+  const entity = 'exceptions';
+  const names = templateNames(entity);
+  const targetDirectory = app.directoriesMap.get('exceptions') || 'app/Exceptions';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeValidators(projectRoot: string, sink: typeof sinkStatic) {
+  const entity = 'validators';
+  const names = templateNames(entity);
+  const targetDirectory = 'app/Validators';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = false;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeControllers(
+  projectRoot: string,
+  app: ApplicationContract,
+  sink: typeof sinkStatic,
+) {
+  const names = templateNames('controllers');
+  const targetDirectory = app.directoriesMap.get('controllers') || 'app/Controllers/Http';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`controllers/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
 }
 
 function makeModels(
@@ -112,17 +258,13 @@ function makeConfig(
 function removeUsersMigration(app: ApplicationContract, sink: typeof sinkStatic) {
   const migrationsDirectory = app.directoriesMap.get('migrations') || 'database';
 
-  // remove existing users migration
-  sink.logger.log('checking existing users migration');
-  const files = fs
-    .readdirSync(migrationsDirectory)
-    .filter((file) => file.endsWith(`_users.ts`));
+  const file = migrationFile(app, 'users');
 
-  if (files.length == 0) {
+  if (file === null) {
     sink.logger.log('no existing users migration');
     return;
   }
-  const migrationPath = join(migrationsDirectory, files[0]);
+  const migrationPath = join(migrationsDirectory, file);
   fs.rmSync(migrationPath);
   sink.logger.action('delete').succeeded(migrationPath);
   // fs.existsSync())
@@ -132,11 +274,14 @@ function removeUsersMigration(app: ApplicationContract, sink: typeof sinkStatic)
 // utilities
 // -------------------
 
-function hasMigrationFile(app: ApplicationContract, migrationName: string): boolean {
+function migrationFile(app: ApplicationContract, migrationName: string): string | null {
   const migrationsDirectory = app.directoriesMap.get('migrations') || 'database';
 
-  const files = fs.readdirSync(migrationsDirectory);
-  return files.some((file) => file.endsWith(`_${migrationName}.ts`));
+  const files = fs
+    .readdirSync(migrationsDirectory)
+    .filter((file) => file.endsWith(`_${migrationName}.ts`));
+  if (files.length == 0) return null;
+  return files[0];
 }
 
 function templateNames(folder: string): string[] {

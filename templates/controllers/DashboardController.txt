@@ -1,0 +1,44 @@
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { schema } from '@ioc:Adonis/Core/Validator'
+import IndexService from 'App/Services/IndexService'
+import { storyConfig } from 'Config/story'
+
+export default class DashboardController {
+  public async index({ inertia, request }: HttpContextContract) {
+    const version = request.all().version
+    const story = request.all().story
+
+    const service = new IndexService(story)
+    const index = await service.getItems(version)
+    const isComplete = index.length >= story.chapterLimit
+    const props = { index, isComplete }
+
+    return inertia.render('DashboardIndex', props)
+  }
+
+  public async poke({ inertia }: HttpContextContract) {
+    const props = { description: 'This is a description' }
+
+    return inertia.render('Poke', props)
+  }
+
+  public async switch({ request, response, session }: HttpContextContract) {
+    const switchRequest = schema.create({
+      language: schema.string(),
+      story: schema.string(),
+    })
+    const payload = await request.validate({ schema: switchRequest })
+
+    const language =
+      storyConfig.languages.find((lang) => lang.language === payload.language) ||
+      storyConfig.languages[0]
+
+    const story =
+      storyConfig.stories.find((story) => story.name === payload.story) || storyConfig.stories[0]
+
+    session.put('locale', language.locale)
+    session.put('storyId', story.id)
+
+    return response.redirect('/')
+  }
+}

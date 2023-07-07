@@ -1,0 +1,35 @@
+import { schema } from '@ioc:Adonis/Core/Validator';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+
+const scriptureSchema = {
+  reference: schema.string(),
+  verse: schema.string(),
+};
+
+export const bundleSchema = {
+  title: schema.string(),
+  introduction: schema.string(),
+  passage: schema.object().members(scriptureSchema),
+};
+
+export default class BundleValidator {
+  private storySchema = bundleSchema;
+  constructor(protected ctx: HttpContextContract) {
+    const story = ctx.request.all().story;
+    switch (story.name) {
+      // case 'Youth':
+      //   this.storySchema = youthSchema as any;
+      //   break;
+      default:
+        this.storySchema = bundleSchema;
+    }
+  }
+
+  public get schema() {
+    return schema.create({
+      bundle: schema.object().members(this.storySchema),
+    });
+  }
+
+  public messages = {};
+}

@@ -1,0 +1,56 @@
+import { schema, rules } from '@ioc:Adonis/Core/Validator';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+
+const liveSchema = {
+  title: schema.string(),
+  icon: schema.string([rules.trim(), rules.url()]),
+  description: schema.string(),
+  body: schema.string(),
+  type: schema.string(),
+  isPublished: schema.boolean(),
+  //   isInsert: schema.boolean.optional([rules.requiredWhen('type', '=', 'scripture')]),
+};
+
+const draftSchema = {
+  title: schema.string.optional(),
+  icon: schema.string.optional(),
+  description: schema.string.optional(),
+  body: schema.string.optional(),
+  type: schema.string(),
+  isPublished: schema.boolean(),
+};
+
+export default class PageValidator {
+  protected isLink: boolean;
+  protected isPublished: boolean;
+
+  constructor(protected ctx: HttpContextContract) {
+    this.isLink = ctx.request.input('type') === 'link';
+    this.isPublished = ctx.request.input('isPublished') === true;
+  }
+
+  public get schema() {
+    if (!this.isPublished) return schema.create(draftSchema);
+    if (this.isLink) {
+      const liveLink = {
+        ...liveSchema,
+        body: schema.string([
+          rules.trim(),
+          rules.url({
+            protocols: ['http', 'https'],
+            requireTld: true,
+            requireProtocol: true,
+            requireHost: true,
+          }),
+        ]),
+      };
+      return schema.create(liveLink);
+    }
+
+    return schema.create(liveSchema);
+  }
+
+  public messages = {
+    'body.url': 'Please enter a valid web link like https://www.example.com',
+  };
+}

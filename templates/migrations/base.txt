@@ -5,6 +5,9 @@ export default class extends BaseSchema {
     // ---------------------------------------
     // users
     // ---------------------------------------
+    
+    this.schema.raw('DROP TABLE IF EXISTS "users"');
+    this.schema.raw('DROP TYPE IF EXISTS "user_role"');
 
     this.schema.createTable('users', (table) => {
       table.increments('id');
@@ -98,7 +101,7 @@ export default class extends BaseSchema {
         .notNullable()
         .comment('IETF BCP 47 language tag like en-US or zh-Hans');
 
-      table.integer('story_id').unsigned().references('stories.id').onDelete('CASCADE');
+      table.integer('story_id').unsigned().notNullable();
 
       table
         .jsonb('items')
