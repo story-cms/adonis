@@ -5,6 +5,8 @@ import Draft from 'App/Models/Draft';
 import IndexService from 'App/Services/IndexService';
 import StoryService from 'App/Services/StoryService';
 import BundleValidator from 'App/Validators/BundleValidator';
+import { Providers } from '@story-cms/ui';
+import Env from '@ioc:Adonis/Core/Env';
 
 export default class DraftsController {
   public async create({ response, request }: HttpContextContract) {
@@ -59,6 +61,18 @@ export default class DraftsController {
       });
     }
 
+    const providers: Providers = {
+      s3Target: {
+        bucket: Env.get('S3_BUCKET'),
+        region: Env.get('S3_REGION'),
+        endpoint: Env.get('S3_ENDPOINT'),
+      },
+      imageProvider: {
+        cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
+        defaultPreset: Env.get('CLOUDINARY_PRESET'),
+      },
+    };
+
     const service = new StoryService(story);
     const indexService = new IndexService(story);
     await indexService.buildIndex(version);
@@ -70,7 +84,8 @@ export default class DraftsController {
       spec: service.spec,
       fields: service.spec.fields,
       feedback: draft.feedback,
-      last_published: lastPublished,
+      lastPublished,
+      providers,
     });
   }
 

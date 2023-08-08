@@ -13,6 +13,7 @@ This library depends on three `AdonisJS` core libraries: `@adonisjs/auth`,
 # NPM
 npm i @story-cms/adonis
 node ace configure @story-cms/adonis
+node ace migration:run
 ```
 
 Complete the installation by registering the below named middleware inside your
@@ -39,3 +40,8 @@ This project happily accepts contributions.
 
 If you have a question or found a bug, feel free to
 [open an issue](https://github.com/story-cms/adonis/issues).
+
+## Roadmap
+
+- add routes
+- add .env.example
