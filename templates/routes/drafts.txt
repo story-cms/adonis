@@ -1,0 +1,9 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/draft/:number/edit', 'DraftsController.edit').middleware('auth');
+Route.get('/draft/create', 'DraftsController.create').middleware('auth');
+Route.delete('/draft/:id', 'DraftsController.delete').middleware('auth');
+Route.post('/draft/:id/save', 'DraftsController.save').middleware('auth');
+Route.post('/draft/:id/publish', 'DraftsController.publish').middleware('auth');
+Route.post('/draft/:id/submit', 'DraftsController.submit').middleware('auth');
+Route.post('/draft/:id/reject', 'DraftsController.reject').middleware('auth');

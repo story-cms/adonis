@@ -69,6 +69,9 @@ export default async function instructions(
   // controllers
   makeControllers(projectRoot, app, sink);
 
+  // routes
+  makeRoutes(projectRoot, sink);
+
   //migrations
   makeBaseMigrations(projectRoot, app, sink, state);
 
@@ -213,6 +216,25 @@ function makeControllers(
   }
 }
 
+function makeRoutes(projectRoot: string, sink: typeof sinkStatic) {
+  const names = templateNames('routes');
+  const targetDirectory = 'start/routes';
+  // fs.mkdirSync(join(projectRoot, 'start', 'routes'), { recursive: true });
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`routes/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
 function makeModels(
   projectRoot: string,
   app: ApplicationContract,
@@ -241,18 +263,22 @@ function makeConfig(
   sink: typeof sinkStatic,
   state: InstructionsState,
 ) {
-  const configDirectory = app.directoriesMap.get('config') || 'config';
-  const configPath = join(configDirectory, 'story.ts');
+  const entity = 'config';
+  const names = templateNames(entity);
+  const targetDirectory = app.directoriesMap.get('config') || 'config';
 
-  const template = new sink.files.MustacheFile(
-    projectRoot,
-    configPath,
-    getStub('config/story.txt'),
-  );
-  template.overwrite = true;
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
 
-  template.apply(state).commit();
-  sink.logger.action('create').succeeded(configPath);
+    template.apply(state).commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
 }
 
 function removeUsersMigration(app: ApplicationContract, sink: typeof sinkStatic) {

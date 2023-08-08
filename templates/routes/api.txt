@@ -1,0 +1,22 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/preview/:number', 'PreviewController.get')
+  .prefix('/api/v1')
+  .where('number', {
+    match: /^[0-9]+$/,
+  });
+Route.get('/chapter/:number', 'ChaptersController.get')
+  .prefix('/api/v1')
+  .where('number', {
+    match: /^[0-9]+$/,
+  });
+Route.get('/chapter/from/:from/to/:to', 'ChaptersController.range')
+  .prefix('/api/v1')
+  .where('from', {
+    match: /^[0-9]+$/,
+  })
+  .where('to', {
+    match: /^[0-9]+$/,
+  });
+Route.get('/index', 'IndicesController.index').prefix('/api/v1');
+Route.get('/page', 'PagesController.get').prefix('/api/v1');

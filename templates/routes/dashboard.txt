@@ -1,0 +1,5 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/', 'DashboardController.index').middleware('auth');
+Route.get('/poke', 'DashboardController.poke').middleware('auth');
+Route.post('/switch', 'DashboardController.switch').middleware('auth');

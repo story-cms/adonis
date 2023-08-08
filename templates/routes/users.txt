@@ -1,0 +1,6 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/user', 'UsersController.index').middleware('admin');
+Route.post('/user', 'UsersController.store').middleware('admin');
+Route.put('/user/:id', 'UsersController.update').middleware('admin');
+Route.delete('/user/:id', 'UsersController.destroy').middleware('admin');

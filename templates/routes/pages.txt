@@ -1,0 +1,8 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/page', 'PagesController.index').middleware('auth');
+Route.get('/page/:id/edit', 'PagesController.edit').middleware('auth');
+Route.get('/page/create', 'PagesController.create').middleware('auth');
+Route.delete('/page/:id', 'PagesController.destroy').middleware('auth');
+Route.post('/page/sort', 'PagesController.sort').middleware('auth');
+Route.post('/page/:id', 'PagesController.update').middleware('auth');

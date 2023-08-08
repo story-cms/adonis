@@ -1,0 +1,11 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/login', 'AuthController.index');
+Route.post('/login', 'AuthController.login');
+Route.get('/logout', 'AuthController.logout');
+
+Route.get('/forgot-password', 'ForgotPasswordController.index');
+Route.post('/forgot-password', 'ForgotPasswordController.forgotPassword');
+
+Route.get('/reset-password/:token', 'ForgotPasswordController.resetRequest');
+Route.post('/reset-password/:token', 'ForgotPasswordController.resetPassword');
