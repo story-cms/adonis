@@ -1,53 +1,53 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import User from 'App/Models/User'
-import Logger from '@ioc:Adonis/Core/Logger'
-import { storyConfig } from 'Config/story'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import { schema, rules } from '@ioc:Adonis/Core/Validator';
+import User from 'App/Models/User';
+import Logger from '@ioc:Adonis/Core/Logger';
+import { storyConfig } from 'Config/story';
 
 export default class UsersController {
   // show a list of all users
   public async index({ inertia, auth }: HttpContextContract) {
-    const users = await User.all()
+    const users = await User.all();
     return inertia.render('UsersIndex', {
       user: auth.user,
       users: users,
       languages: storyConfig.languages,
-    })
+    });
   }
 
   // patch a user's information
   public async update({ request, response, params, session }: HttpContextContract) {
-    const id = Number(params.id)
-    const user = await User.findOrFail(id)
-    updateUserSchema.email = schema.string({ trim: true }, [rules.email()])
+    const id = Number(params.id);
+    const user = await User.findOrFail(id);
+    updateUserSchema.email = schema.string({ trim: true }, [rules.email()]);
     try {
       const payload = await request.validate({
         schema: schema.create(updateUserSchema),
         messages: validationFeedback,
-      })
-      user.name = payload.name
-      user.email = payload.email
-      user.role = payload.role
-      user.language = payload.language
-      user.save()
+      });
+      user.name = payload.name;
+      user.email = payload.email;
+      user.role = payload.role;
+      user.language = payload.language;
+      user.save();
     } catch (e) {
-      session.flash('errors', { other: e.message })
+      session.flash('errors', { other: e.message });
     }
 
-    return response.redirect('/user', false, 303)
+    return response.redirect('/user', false, 303);
   }
 
   // delete a user
   public async destroy({ response, params, session }: HttpContextContract) {
-    const id = Number(params.id)
-    const user = await User.findOrFail(id)
+    const id = Number(params.id);
+    const user = await User.findOrFail(id);
     try {
-      await user.delete()
+      await user.delete();
     } catch (e) {
-      session.flash('errors', { other: e.message })
+      session.flash('errors', { other: e.message });
     }
 
-    return response.redirect('/user', false, 303)
+    return response.redirect('/user', false, 303);
   }
 
   // create a new user
@@ -59,20 +59,20 @@ export default class UsersController {
         column: 'email',
         caseInsensitive: true,
       }),
-    ])
+    ]);
     const payload = await request.validate({
       schema: schema.create(updateUserSchema),
       messages: validationFeedback,
-    })
+    });
 
     try {
-      await User.create({ ...payload, password: 'pending' })
+      await User.create({ ...payload, password: 'pending' });
     } catch (e) {
-      Logger.error(e.message)
-      session.flash('errors', { other: e.message })
+      Logger.error(e.message);
+      session.flash('errors', { other: e.message });
     }
 
-    return response.redirect('/user', false, 303)
+    return response.redirect('/user', false, 303);
   }
 }
 
@@ -81,11 +81,11 @@ const updateUserSchema = {
   email: schema.string({ trim: true }, [rules.email()]),
   language: schema.string({}, [rules.required()]),
   role: schema.enum(User.roles),
-}
+};
 
 const validationFeedback = {
   'name.required': "The name can't be blank.",
   'email.required': "The email can't be blank.",
   'email.unique': 'That email is already used.',
   'email.email': 'Enter a valid email address.',
-}
+};

@@ -1,22 +1,22 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { storyConfig } from 'Config/story'
-import IndexService from 'App/Services/IndexService'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import { storyConfig } from 'Config/story';
+import IndexService from 'App/Services/IndexService';
 
 export default class IndicesController {
   // API endpoint without context
   public async index({ request, response }: HttpContextContract) {
-    const storylabel = request.qs()['story'] || storyConfig.stories[0].name
-    const story = storyConfig.stories.find((s) => s.name === storylabel)
+    const storylabel = request.qs()['story'] || storyConfig.stories[0].name;
+    const story = storyConfig.stories.find((s) => s.name === storylabel);
 
-    if (!story) return response.status(404)
+    if (!story) return response.status(404);
 
     const version = {
       storyId: story.id,
       apiVersion: storyConfig.schemaVersion,
       locale: request.qs()['locale'] || 'en',
-    }
-    const service = new IndexService(story)
-    const grouped = await service.groupedIndex(version)
+    };
+    const service = new IndexService(story);
+    const grouped = await service.groupedIndex(version);
     return {
       stories: [
         {
@@ -24,6 +24,6 @@ export default class IndicesController {
           parts: grouped,
         },
       ],
-    }
+    };
   }
 }

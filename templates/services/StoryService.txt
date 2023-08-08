@@ -1,40 +1,40 @@
-import { storyConfig } from 'Config/story'
-import { StorySpec, ImageProvider, Story } from '@story-cms/ui'
-import Env from '@ioc:Adonis/Core/Env'
+import { storyConfig } from 'Config/story';
+import { StorySpec, ImageProvider, Story } from '@story-cms/ui';
+import Env from '@ioc:Adonis/Core/Env';
 
 export default class StoryService {
-  public story: Story
-  public config: Object
-  private _spec: StorySpec
+  public story: Story;
+  public config: Object;
+  private _spec: StorySpec;
 
   constructor(story: Story) {
-    this.config = storyConfig
-    this.story = story
+    this.config = storyConfig;
+    this.story = story;
   }
 
   public get spec(): StorySpec {
-    if (this._spec !== undefined) return this._spec
+    if (this._spec !== undefined) return this._spec;
     this._spec = {
       chapterLimit: this.story.chapterLimit,
       hasEditReview: this.config['hasEditReview'],
       fields: this.decoratedSpec(this.story['fields']),
-    }
-    return this._spec
+    };
+    return this._spec;
   }
 
   private decoratedSpec(node: Object[]): Object[] {
     return node.map((n) => {
       if (n['widget'] === 'list' || n['widget'] === 'panel')
-        return { ...n, fields: this.decoratedSpec(n['fields']) }
-      if (n['widget'] === 'object') return n // can't walk an object just yet
+        return { ...n, fields: this.decoratedSpec(n['fields']) };
+      if (n['widget'] === 'object') return n; // can't walk an object just yet
       if (n['widget'] === 'image' || n['widget'] === 'animation') {
         const imageProvider: ImageProvider = {
           defaultPreset: '',
           cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
-        }
-        return { ...n, provider: imageProvider }
+        };
+        return { ...n, provider: imageProvider };
       }
-      return n
-    })
+      return n;
+    });
   }
 }

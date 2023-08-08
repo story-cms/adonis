@@ -1,48 +1,48 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Page, { PageVersion } from 'App/Models/Page'
-import { storyConfig } from 'Config/story'
-import PageService from 'App/Services/PageService'
-import PageValidator from 'App/Validators/PageValidator'
-import { SessionContract } from '@ioc:Adonis/Addons/Session'
-import { ImageProvider } from '@story-cms/ui'
-import Env from '@ioc:Adonis/Core/Env'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Page, { PageVersion } from 'App/Models/Page';
+import { storyConfig } from 'Config/story';
+import PageService from 'App/Services/PageService';
+import PageValidator from 'App/Validators/PageValidator';
+import { SessionContract } from '@ioc:Adonis/Addons/Session';
+import { ImageProvider } from '@story-cms/ui';
+import Env from '@ioc:Adonis/Core/Env';
 
 export default class PagesController {
   public async get({ request }: HttpContextContract) {
-    const locale = request.qs()['locale'] || 'en'
+    const locale = request.qs()['locale'] || 'en';
 
     const service = new PageService({
       apiVersion: 1,
       locale: locale,
-    })
-    const items = await service.getPageItemsForClient()
+    });
+    const items = await service.getPageItemsForClient();
 
-    return { pages: items }
+    return { pages: items };
   }
 
   public async index({ inertia, auth, session }: HttpContextContract) {
-    const version = versionFromSession(session)
-    const service = new PageService(version)
-    const pages = await service.getPageItems()
+    const version = versionFromSession(session);
+    const service = new PageService(version);
+    const pages = await service.getPageItems();
     return inertia.render('PagesIndex', {
       user: auth.user,
       pages: pages,
-    })
+    });
   }
 
   public async edit({ inertia, params, auth }: HttpContextContract) {
-    const page = await Page.findOrFail(params.id)
+    const page = await Page.findOrFail(params.id);
     const imageProvider: ImageProvider = {
       defaultPreset: '',
       cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
-    }
+    };
 
     return inertia.render('PagesEdit', {
       user: auth.user,
       imageProvider: imageProvider,
       page: page,
       bundle: page.model,
-    })
+    });
   }
 
   public async create({ response, session, auth }: HttpContextContract) {
@@ -52,77 +52,77 @@ export default class PagesController {
       order: 1,
       bundle: '{"group":1}',
       updatedBy: auth.user?.id,
-    })
+    });
 
-    return response.redirect(`/page/${page.id}/edit`, false, 303)
+    return response.redirect(`/page/${page.id}/edit`, false, 303);
   }
 
   public async destroy({ params, response, session }: HttpContextContract) {
-    const id = Number(params.id)
-    const page = await Page.findOrFail(id)
+    const id = Number(params.id);
+    const page = await Page.findOrFail(id);
     try {
-      await page.delete()
+      await page.delete();
     } catch (e) {
-      session.flash('errors', { other: e.message })
+      session.flash('errors', { other: e.message });
     }
 
-    return response.redirect('/page', false, 303)
+    return response.redirect('/page', false, 303);
   }
 
   public async update(ctx: HttpContextContract) {
-    let payload
+    let payload;
     try {
       // constructing the validator first so we can have a
       // dynamic getter for the schema property
-      const validator = new PageValidator(ctx)
+      const validator = new PageValidator(ctx);
       payload = await ctx.request.validate({
         schema: validator.schema,
         messages: validator.messages,
-      })
+      });
     } catch (e) {
-      ctx.session.flash('errors', prepend(e.messages))
-      return ctx.response.redirect().back()
+      ctx.session.flash('errors', prepend(e.messages));
+      return ctx.response.redirect().back();
     }
 
-    const id = Number(ctx.params.id)
-    const page = await Page.findOrFail(id)
+    const id = Number(ctx.params.id);
+    const page = await Page.findOrFail(id);
 
-    page.updateBundle(payload)
-    page.isPublished = payload.isPublished
-    await page.save()
+    page.updateBundle(payload);
+    page.isPublished = payload.isPublished;
+    await page.save();
 
-    return ctx.response.redirect().back()
+    return ctx.response.redirect().back();
   }
 
   public async sort({ response, request, session }: HttpContextContract) {
-    const version = versionFromSession(session)
+    const version = versionFromSession(session);
 
     // use the service to sort the pages in memory
-    const service = new PageService(version)
-    const pages = await service.pagesFromItems(request.input('items'))
+    const service = new PageService(version);
+    const pages = await service.pagesFromItems(request.input('items'));
 
     // save all the pages
     for (const page of pages) {
-      await page.save()
+      await page.save();
     }
 
-    return response.redirect().back()
+    return response.redirect().back();
   }
 }
 
 // The model store on the client requires that the error messages
 // each have a "bundle" prefix
 const prepend = (plain: Object): Object => {
-  const result = {}
+  const result = {};
   for (const key in plain) {
-    result[`bundle.${key}`] = plain[key]
+    result[`bundle.${key}`] = plain[key];
   }
-  return result
-}
+  return result;
+};
 
 const versionFromSession = (session: SessionContract): PageVersion => {
   return {
     locale: session.get('locale') || 'en',
     apiVersion: storyConfig.pages.schemaVersion,
-  } as PageVersion
-}
+  } as PageVersion;
+};
