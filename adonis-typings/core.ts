@@ -1,4 +1,6 @@
 declare module '@ioc:StoryCms/Core' {
+  import { Specifier, FieldSpec } from '@story-cms/ui';
+
   export type StoryConfig = {
     meta: {
       name: string;
@@ -16,11 +18,7 @@ declare module '@ioc:StoryCms/Core' {
     stories: {
       id: number;
       name: string;
-      fields: {
-        label: string;
-        name: string;
-        widget: string;
-      }[];
+      fields: FieldSpec[];
       chapterLimit: number;
     }[];
     pages: {
@@ -29,7 +27,6 @@ declare module '@ioc:StoryCms/Core' {
     };
   };
 
-  import { Specifier } from '@story-cms/ui';
   import { BaseModel } from '@ioc:Adonis/Lucid/Orm';
   export class Chapter extends BaseModel {
     locale: string;
