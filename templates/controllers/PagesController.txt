@@ -2,10 +2,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Page, { PageVersion } from 'App/Models/Page';
 import { storyConfig } from 'Config/story';
 import PageService from 'App/Services/PageService';
+import StoryService from 'App/Services/StoryService';
 import PageValidator from 'App/Validators/PageValidator';
 import { SessionContract } from '@ioc:Adonis/Addons/Session';
-import { ImageProvider } from '@story-cms/ui';
-import Env from '@ioc:Adonis/Core/Env';
 
 export default class PagesController {
   public async get({ request }: HttpContextContract) {
@@ -32,14 +31,10 @@ export default class PagesController {
 
   public async edit({ inertia, params, auth }: HttpContextContract) {
     const page = await Page.findOrFail(params.id);
-    const imageProvider: ImageProvider = {
-      defaultPreset: '',
-      cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
-    };
 
     return inertia.render('PagesEdit', {
       user: auth.user,
-      imageProvider: imageProvider,
+      providers: StoryService.providers,
       page: page,
       bundle: page.model,
     });

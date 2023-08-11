@@ -1,5 +1,5 @@
 import { storyConfig } from 'Config/story';
-import { StorySpec, ImageProvider, Story } from '@story-cms/ui';
+import { StorySpec, ImageProvider, Story, Providers } from '@story-cms/ui';
 import Env from '@ioc:Adonis/Core/Env';
 
 export default class StoryService {
@@ -11,6 +11,18 @@ export default class StoryService {
     this.config = storyConfig;
     this.story = story;
   }
+
+  static providers: Providers = {
+    s3Target: {
+      bucket: Env.get('S3_BUCKET'),
+      region: Env.get('S3_REGION'),
+      endpoint: Env.get('S3_ENDPOINT'),
+    },
+    imageProvider: {
+      cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
+      defaultPreset: Env.get('CLOUDINARY_PRESET'),
+    },
+  };
 
   public get spec(): StorySpec {
     if (this._spec !== undefined) return this._spec;
