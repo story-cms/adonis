@@ -1,3 +1,4 @@
+// import { Story, Version } from '@story-cms/ui';
 declare module '@ioc:Adonis/Core/HttpContext' {
   interface HttpContextContract {
     auth: {
@@ -9,5 +10,7 @@ declare module '@ioc:Adonis/Core/HttpContext' {
         isAdmin: boolean;
       };
     };
+    version?: {};
+    story?: {};
   }
 }

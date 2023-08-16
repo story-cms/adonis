@@ -56,29 +56,14 @@ export default async function instructions(
   });
 
   makeConfig(projectRoot, app, sink, state);
-
-  // models
   makeModels(projectRoot, app, sink);
-
-  // services
   makeServices(projectRoot, sink);
-
-  // validators
   makeValidators(projectRoot, sink);
-
-  // controllers
   makeControllers(projectRoot, app, sink);
-
-  // routes
   makeRoutes(projectRoot, sink);
-
-  //migrations
   makeBaseMigrations(projectRoot, app, sink, state);
-
-  //commands
   makeCommands(projectRoot, sink);
-
-  // exceptions
+  makeContracts(projectRoot, sink);
   makeExceptions(projectRoot, app, sink);
 }
 
@@ -137,6 +122,25 @@ function makeCommands(projectRoot: string, sink: typeof sinkStatic) {
   const entity = 'commands';
   const names = templateNames(entity);
   const targetDirectory = 'commands';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeContracts(projectRoot: string, sink: typeof sinkStatic) {
+  const entity = 'contracts';
+  const names = templateNames(entity);
+  const targetDirectory = 'contracts';
 
   for (const name of names) {
     const outPath = join(targetDirectory, `${name}.ts`);

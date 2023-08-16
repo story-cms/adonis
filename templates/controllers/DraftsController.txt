@@ -7,15 +7,15 @@ import StoryService from 'App/Services/StoryService';
 import BundleValidator from 'App/Validators/BundleValidator';
 
 export default class DraftsController {
-  public async create({ response, request }: HttpContextContract) {
-    const version = request.all().version;
-    const story = request.all().story;
+  public async create(ctx: HttpContextContract) {
+    const version = ctx.version;
+    const story = ctx.story;
 
     const service = new IndexService(story);
     const index = await service.getItems(version);
     const number = index.length + 1;
 
-    if (index.length >= story.chapterLimit) return response.redirect('/');
+    if (index.length >= story.chapterLimit) return ctx.response.redirect('/');
 
     const bundle = service.getDefaultStoryBundle(story.fields);
 
@@ -25,18 +25,18 @@ export default class DraftsController {
       bundle,
     });
 
-    return response.redirect(`/draft/${number}/edit`);
+    return ctx.response.redirect(`/draft/${number}/edit`);
   }
 
-  public async edit({ inertia, params, response, request, auth }: HttpContextContract) {
-    const version = request.all().version;
-    const story = request.all().story;
+  public async edit(ctx: HttpContextContract) {
+    const version = ctx.version;
+    const story = ctx.story;
 
     const specifier = {
       apiVersion: version.apiVersion,
       locale: version.locale,
       storyId: story.id,
-      number: Number(params.number),
+      number: Number(ctx.params.number),
     };
 
     let draft = await Draft.query().where(specifier).first();
@@ -50,7 +50,7 @@ export default class DraftsController {
 
     if (!draft) {
       if (!chapter) {
-        return response.notFound();
+        return ctx.response.notFound();
       }
       lastPublished = chapter.updatedAt.toString();
       draft = await Draft.create({
@@ -63,8 +63,8 @@ export default class DraftsController {
     const indexService = new IndexService(story);
     await indexService.buildIndex(version);
 
-    return inertia.render('DraftIndex', {
-      user: auth.user,
+    return ctx.inertia.render('DraftIndex', {
+      user: ctx.auth.user,
       draft,
       bundle: draft!.bundle,
       spec: service.spec,
@@ -76,27 +76,27 @@ export default class DraftsController {
   }
 
   // Only saving the draft without performing any validation
-  public async save({ request, response, params, session }: HttpContextContract) {
-    const story = request.all().story;
+  public async save(ctx: HttpContextContract) {
+    const story = ctx.story;
 
     try {
-      const id = Number(params.id);
+      const id = Number(ctx.params.id);
       const draft = await Draft.findOrFail(id);
 
-      draft.bundle = request.input('bundle');
+      draft.bundle = ctx.request.input('bundle');
       await draft.save();
       const service = new IndexService(story);
       await service.buildIndex(draft.version);
     } catch (e) {
       const errors = e.messages || e.message || 'Error while saving this draft. Sorry!';
-      session.flash('errors', errors);
+      ctx.session.flash('errors', errors);
     }
 
-    return response.redirect().back();
+    return ctx.response.redirect().back();
   }
 
   public async submit(ctx: HttpContextContract) {
-    const story = ctx.request.all().story;
+    const story = ctx.story;
 
     const id = Number(ctx.params.id);
     const draft = await Draft.findOrFail(id);
@@ -133,7 +133,7 @@ export default class DraftsController {
   }
 
   public async publish(ctx: HttpContextContract) {
-    const story = ctx.request.all().story;
+    const story = ctx.story;
     const id = Number(ctx.params.id);
     const draft = await Draft.findOrFail(id);
 
@@ -176,10 +176,10 @@ export default class DraftsController {
     return ctx.response.redirect('/');
   }
 
-  public async delete({ params, response, request }: HttpContextContract) {
-    const story = request.all().story;
+  public async delete(ctx: HttpContextContract) {
+    const story = ctx.story;
 
-    const id = Number(params.id);
+    const id = Number(ctx.params.id);
     const draft = await Draft.findOrFail(id);
 
     const version = { ...draft.version };
@@ -187,6 +187,6 @@ export default class DraftsController {
     const service = new IndexService(story);
     await service.buildIndex(version);
 
-    return response.redirect('/', false, 303);
+    return ctx.response.redirect('/', false, 303);
   }
 }

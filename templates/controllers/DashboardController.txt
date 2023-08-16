@@ -4,16 +4,16 @@ import IndexService from 'App/Services/IndexService';
 import { storyConfig } from 'Config/story';
 
 export default class DashboardController {
-  public async index({ inertia, request }: HttpContextContract) {
-    const version = request.all().version;
-    const story = request.all().story;
+  public async index(ctx: HttpContextContract) {
+    const version = ctx.version;
+    const story = ctx.story;
 
     const service = new IndexService(story);
     const index = await service.getItems(version);
     const isComplete = index.length >= story.chapterLimit;
     const props = { index, isComplete };
 
-    return inertia.render('DashboardIndex', props);
+    return ctx.inertia.render('DashboardIndex', props);
   }
 
   public async poke({ inertia }: HttpContextContract) {

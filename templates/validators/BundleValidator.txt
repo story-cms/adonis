@@ -15,7 +15,7 @@ export const bundleSchema = {
 export default class BundleValidator {
   private storySchema = bundleSchema;
   constructor(protected ctx: HttpContextContract) {
-    const story = ctx.request.all().story;
+    const story = ctx.story;
     switch (story.name) {
       // case 'Youth':
       //   this.storySchema = youthSchema as any;

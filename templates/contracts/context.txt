@@ -1,0 +1,8 @@
+declare module '@ioc:Adonis/Core/HttpContext' {
+  import { Story, Version } from '@story-cms/ui';
+
+  interface HttpContextContract {
+    version?: Version;
+    story?: Story;
+  }
+}
