@@ -5,6 +5,8 @@ import { storyConfig } from 'Config/story';
 
 export default class DashboardController {
   public async index(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
+
     const version = ctx.version;
     const story = ctx.story;
 

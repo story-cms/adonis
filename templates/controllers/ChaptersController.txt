@@ -6,6 +6,8 @@ import View from '@ioc:Adonis/Core/View';
 
 export default class ChaptersController {
   public async preview(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
+
     const version = ctx.version;
     const story = ctx.story;
 

@@ -12,7 +12,7 @@ export default class StoryService {
     this.story = story;
   }
 
-  static providers: Providers = {
+  public static providers: Providers = {
     s3Target: {
       bucket: Env.get('S3_BUCKET'),
       region: Env.get('S3_REGION'),

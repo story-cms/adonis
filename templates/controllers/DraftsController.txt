@@ -8,6 +8,8 @@ import BundleValidator from 'App/Validators/BundleValidator';
 
 export default class DraftsController {
   public async create(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
+
     const version = ctx.version;
     const story = ctx.story;
 
@@ -29,6 +31,8 @@ export default class DraftsController {
   }
 
   public async edit(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
+
     const version = ctx.version;
     const story = ctx.story;
 
@@ -77,6 +81,8 @@ export default class DraftsController {
 
   // Only saving the draft without performing any validation
   public async save(ctx: HttpContextContract) {
+    if (!ctx.story) return ctx.response.notFound();
+
     const story = ctx.story;
 
     try {
@@ -96,7 +102,9 @@ export default class DraftsController {
   }
 
   public async submit(ctx: HttpContextContract) {
-    const story = ctx.story;
+    if (!ctx.story) return ctx.response.notFound();
+
+    const story = ctx.story!;
 
     const id = Number(ctx.params.id);
     const draft = await Draft.findOrFail(id);
@@ -133,6 +141,8 @@ export default class DraftsController {
   }
 
   public async publish(ctx: HttpContextContract) {
+    if (!ctx.story) return ctx.response.notFound();
+
     const story = ctx.story;
     const id = Number(ctx.params.id);
     const draft = await Draft.findOrFail(id);
@@ -177,6 +187,8 @@ export default class DraftsController {
   }
 
   public async delete(ctx: HttpContextContract) {
+    if (!ctx.story) return ctx.response.notFound();
+
     const story = ctx.story;
 
     const id = Number(ctx.params.id);
