@@ -9,7 +9,7 @@ type InstructionsState = {
   storyType: string;
   chapterType: string;
   logoUrl: string;
-
+  helpUrl: string;
   hasEditReview: boolean;
 };
 
@@ -24,6 +24,7 @@ export default async function instructions(
     chapterType: 'Devotion',
     logoUrl:
       'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
+    helpUrl: 'https://help.example.com',
     hasEditReview: false,
   };
 
@@ -50,6 +51,13 @@ export default async function instructions(
 
   state.logoUrl = await sink.getPrompt().ask('Enter the url for the hosted app logo', {
     default: state.logoUrl,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
+  state.helpUrl = await sink.getPrompt().ask('Enter the url for the hosted help page', {
+    default: state.helpUrl,
     validate(view) {
       return !!view.length || 'This cannot be left empty';
     },

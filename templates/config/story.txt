@@ -25,6 +25,7 @@ export const storyConfig: StoryConfig = {
     storyType: '{{storyType}}',
     chapterType: '{{chapterType}}',
     logo: '{{logoUrl}}',
+    helpUrl: '{{helpUrl}}',
   },
 
   hasEditReview: false,
