@@ -11,6 +11,7 @@ type InstructionsState = {
   logoUrl: string;
   helpUrl: string;
   hasEditReview: boolean;
+  hasAppPreview: boolean;
 };
 
 export default async function instructions(
@@ -26,6 +27,7 @@ export default async function instructions(
       'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
     helpUrl: 'https://help.example.com',
     hasEditReview: false,
+    hasAppPreview: false,
   };
 
   state.appName = await sink.getPrompt().ask('Enter the name of the app', {

@@ -29,6 +29,7 @@ export default class StoryService {
     this._spec = {
       chapterLimit: this.story.chapterLimit,
       hasEditReview: this.config['hasEditReview'],
+      hasAppPreview: this.config['hasAppPreview'],
       fields: this.decoratedSpec(this.story['fields']),
     };
     return this._spec;

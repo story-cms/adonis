@@ -10,6 +10,7 @@ declare module '@ioc:StoryCms/Core' {
       logo: string;
     };
     hasEditReview: boolean;
+    hasAppPreview: boolean;
     languages: {
       locale: string;
       language: string;
