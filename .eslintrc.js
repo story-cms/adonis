@@ -6,12 +6,24 @@ module.exports = {
     "extends": "standard-with-typescript",
     "overrides": [
         {
+            "files": [
+                "*.ts",
+                "*.tsx"
+            ],
+            "rules": {
+                "@typescript-eslint/semi": ["error", "always"]
+            }
+        },
+        {
             "env": {
                 "node": true
             },
             "files": [
                 ".eslintrc.{js,cjs}"
             ],
+            "rules": {
+                "semi": ["error", "always"]
+            },
             "parserOptions": {
                 "sourceType": "script"
             }
@@ -22,5 +34,6 @@ module.exports = {
         "sourceType": "module"
     },
     "rules": {
-    }
+    },
+    "ignorePatterns": ["build/"]
 }
