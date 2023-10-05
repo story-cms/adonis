@@ -25,7 +25,7 @@ export default async function instructions(
     chapterType: 'Devotion',
     logoUrl:
       'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
-    helpUrl: 'https://help.example.com',
+    helpUrl: 'https://www.markdownguide.org',
     hasEditReview: false,
     hasAppPreview: false,
   };
