@@ -9,8 +9,9 @@ type InstructionsState = {
   storyType: string;
   chapterType: string;
   logoUrl: string;
-
+  helpUrl: string;
   hasEditReview: boolean;
+  hasAppPreview: boolean;
 };
 
 export default async function instructions(
@@ -24,7 +25,9 @@ export default async function instructions(
     chapterType: 'Devotion',
     logoUrl:
       'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
+    helpUrl: 'https://www.markdownguide.org',
     hasEditReview: false,
+    hasAppPreview: false,
   };
 
   state.appName = await sink.getPrompt().ask('Enter the name of the app', {
@@ -50,6 +53,13 @@ export default async function instructions(
 
   state.logoUrl = await sink.getPrompt().ask('Enter the url for the hosted app logo', {
     default: state.logoUrl,
+    validate(view) {
+      return !!view.length || 'This cannot be left empty';
+    },
+  });
+
+  state.helpUrl = await sink.getPrompt().ask('Enter the url for the hosted help page', {
+    default: state.helpUrl,
     validate(view) {
       return !!view.length || 'This cannot be left empty';
     },

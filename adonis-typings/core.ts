@@ -6,9 +6,11 @@ declare module '@ioc:StoryCms/Core' {
       name: string;
       storyType: string;
       chapterType: string;
+      helpUrl: string;
       logo: string;
     };
     hasEditReview: boolean;
+    hasAppPreview: boolean;
     languages: {
       locale: string;
       language: string;
