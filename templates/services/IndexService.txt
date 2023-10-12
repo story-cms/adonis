@@ -74,15 +74,16 @@ export default class IndexService {
     });
   }
 
-  public async groupedIndex(version: Version): Promise<any[]> {
+  public async getIndex(version: Version): Promise<any[]> {
     const index = await Index.query().where(version).firstOrFail();
+
     if (!index) return [];
 
-    if (!this.story.parts) {
+    if (!this.storyHasParts) {
       return index!.publicList;
     }
 
-    const grouped = this.story.parts.map((part: Part) => ({
+    const grouped = this.story.parts!.map((part: Part) => ({
       id: part.id,
       title: part.title,
       subtitle: part.subtitle,
@@ -102,6 +103,10 @@ export default class IndexService {
     });
 
     return grouped;
+  }
+
+  public get storyHasParts(): boolean {
+    return !!this.story.parts;
   }
 
   public async getCurrentApiVersion(): Promise<number> {

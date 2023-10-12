@@ -40,7 +40,7 @@
     "type": "git",
     "url": "git+https://github.com/story-cms/adonis.git"
   },
-  "author": "SturyCMS",
+  "author": "Story CMS",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/story-cms/adonis/issues"
