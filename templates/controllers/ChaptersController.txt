@@ -28,25 +28,30 @@ export default class ChaptersController {
     });
   }
 
-  public async get({ request, params, response }: HttpContextContract) {
-    const locale = request.qs()['locale'] || 'en';
-    const mediaLocale = request.qs()['media'] || locale;
-    const storylabel = request.qs()['story'] || storyConfig.stories[0].name;
-
-    const story = storyConfig.stories.find((s) => s.name === storylabel);
-    if (!story) return response.notFound();
+  public async get(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
 
     const specifier = {
-      storyId: story!.id,
-      apiVersion: storyConfig.schemaVersion,
-      locale: locale,
-      number: Number(params.number),
+      ...ctx.version,
+      number: Number(ctx.params.number),
     };
 
     const chapter = await Chapter.query().where(specifier).firstOrFail();
-    const service = new ChapterService(chapter);
-    const shaped = await service.withMediaChange(mediaLocale);
 
-    return { number: chapter.number, bundle: shaped.bundle };
+    return { number: chapter.number, bundle: chapter.bundle };
+  }
+
+  public async range(ctx: HttpContextContract) {
+    if (!ctx.version || !ctx.story) return ctx.response.notFound();
+
+    const page = ctx.request.qs()['page'] || 1;
+
+    const chapters = await Chapter.query()
+      .whereBetween('number', [ctx.params.from, ctx.params.to])
+      .where(ctx.version)
+      .orderBy('number', 'asc')
+      .paginate(page, 20);
+
+    return chapters;
   }
 }

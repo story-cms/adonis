@@ -13,12 +13,11 @@ export default class VersionContext {
     }
 
     // determine the version
-    const storyId = ctx.session.get('storyId');
-    const story =
-      this.config.stories.find((s) => s.id === storyId) || this.config.stories[0];
+    const story = this.getStoryFromSessionOrQuery(ctx);
+
     const version: Version = {
       apiVersion: this.config.schemaVersion,
-      locale: ctx.session.get('locale') || 'en',
+      locale: ctx.session.get('locale') || ctx.request.qs()['locale'] || 'en',
       storyId: story.id,
     };
 
@@ -28,6 +27,30 @@ export default class VersionContext {
     await next();
   }
 
+  private getStoryFromSessionOrQuery(ctx: HttpContextContract) {
+    const defaultStory = this.config.stories[0];
+
+    // try from the session first
+    const storyId = ctx.session.get('storyId');
+    if (storyId !== undefined) {
+      const story =
+      this.config.stories.find((s) => s.id === storyId) || defaultStory;
+      return story;
+    }
+
+    // for api calls, try the query parameters
+    let storylabel = ctx.request.qs()['story']
+    if (storylabel === undefined) return defaultStory;
+
+    storylabel = storylabel.toLowerCase();
+
+    const story = this.config.stories.find(
+      (s) => s.name.toLocaleLowerCase() === storylabel,
+    );
+
+    return story || defaultStory;
+  }
+
   private shouldIgnore(request: RequestContract): boolean {
     if (request.matchesRoute('/switch')) return true;
 
@@ -35,7 +58,6 @@ export default class VersionContext {
     if (request.matchesRoute('/login')) return true;
     if (request.matchesRoute('/forgot-password')) return true;
     if (request.url().startsWith('/reset-password')) return true;
-    if (request.url().startsWith('/api/')) return true;
 
     return false;
   }
