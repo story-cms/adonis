@@ -24,12 +24,12 @@ export default class DashboardController {
     return inertia.render('Poke', props);
   }
 
-  public async switch({ request, response, session }: HttpContextContract) {
+  public async switch(ctx: HttpContextContract) {
     const switchRequest = schema.create({
       language: schema.string(),
       story: schema.string(),
     });
-    const payload = await request.validate({ schema: switchRequest });
+    const payload = await ctx.request.validate({ schema: switchRequest });
 
     const language =
       storyConfig.languages.find((lang) => lang.language === payload.language) ||
@@ -39,9 +39,10 @@ export default class DashboardController {
       storyConfig.stories.find((story) => story.name === payload.story) ||
       storyConfig.stories[0];
 
-    session.put('locale', language.locale);
-    session.put('storyId', story.id);
+    ctx.session.put('locale', language.locale);
+    ctx.session.put('storyId', story.id);
 
-    return response.redirect('/');
+    // force a page relaod to refresh the stores
+    return ctx.inertia.location('/');
   }
 }

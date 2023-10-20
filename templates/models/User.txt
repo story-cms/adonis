@@ -20,13 +20,13 @@ export default class User extends BaseModel {
   @column()
   public language: string | null;
 
-  @column()
+  @column({ serializeAs: null })
   public rememberMeToken?: string;
 
-  @column()
+  @column({ serializeAs: null })
   public resetToken?: string;
 
-  @column()
+  @column({ serializeAs: null })
   public resetTokenCreatedAt?: DateTime;
 
   @column()

@@ -74,6 +74,7 @@ export default async function instructions(
   makeBaseMigrations(projectRoot, app, sink, state);
   makeCommands(projectRoot, sink);
   makeContracts(projectRoot, sink);
+  makeStart(projectRoot, sink);
   makeExceptions(projectRoot, app, sink);
 }
 
@@ -151,6 +152,25 @@ function makeContracts(projectRoot: string, sink: typeof sinkStatic) {
   const entity = 'contracts';
   const names = templateNames(entity);
   const targetDirectory = 'contracts';
+
+  for (const name of names) {
+    const outPath = join(targetDirectory, `${name}.ts`);
+    const template = new sink.files.MustacheFile(
+      projectRoot,
+      outPath,
+      getStub(`${entity}/${name}.txt`),
+    );
+    template.overwrite = true;
+
+    template.commit();
+    sink.logger.action('create').succeeded(outPath);
+  }
+}
+
+function makeStart(projectRoot: string, sink: typeof sinkStatic) {
+  const entity = 'start';
+  const names = templateNames(entity);
+  const targetDirectory = 'start';
 
   for (const name of names) {
     const outPath = join(targetDirectory, `${name}.ts`);
