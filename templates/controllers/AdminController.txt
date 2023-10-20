@@ -1,0 +1,47 @@
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Env from '@ioc:Adonis/Core/Env';
+import AdminService from 'App/Services/AdminService';
+
+export default class AdminController {
+  public async reIndex(ctx: HttpContextContract) {
+    if (ctx.request.qs().token !== Env.get('APP_KEY')) {
+      return ctx.response.unauthorized();
+    }
+
+    const service = new AdminService();
+    try {
+      await service.rebuildIndexes();
+    } catch (error) {
+      return {
+        result: 'error',
+        feedback: error.message,
+      };
+    }
+
+    return {
+      result: 'ok',
+      feedback: service.feedback,
+    };
+  }
+
+  public async fixSequence(ctx: HttpContextContract) {
+    if (ctx.request.qs().token !== Env.get('APP_KEY')) {
+      return ctx.response.unauthorized();
+    }
+
+    const service = new AdminService();
+    try {
+      await service.syncAutoIncrement();
+    } catch (error) {
+      return {
+        result: 'error',
+        feedback: error.message,
+      };
+    }
+
+    return {
+      result: 'ok',
+      feedback: service.feedback,
+    };
+  }
+}

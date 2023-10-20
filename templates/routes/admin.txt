@@ -1,0 +1,4 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/admin/re-index', 'AdminController.reIndex');
+Route.get('/admin/sync', 'AdminController.fixSequence');
