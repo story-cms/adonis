@@ -35,8 +35,6 @@ export default class Chapter extends BaseModel {
       number: this.number,
       title: this.bundle['title'],
       imageUrl: this.bundle['imageUrl'],
-      part: this.bundle['part'],
-      reference: this.bundle['passage']?.['reference'] ?? '',
     };
   }
 

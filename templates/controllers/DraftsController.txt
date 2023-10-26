@@ -2,6 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Database from '@ioc:Adonis/Lucid/Database';
 import Chapter from 'App/Models/Chapter';
 import Draft from 'App/Models/Draft';
+import DraftService from 'App/Services/DraftService';
 import IndexService from 'App/Services/IndexService';
 import StoryService from 'App/Services/StoryService';
 import BundleValidator from 'App/Validators/BundleValidator';
@@ -10,19 +11,23 @@ export default class DraftsController {
   public async create(ctx: HttpContextContract) {
     if (!ctx.version || !ctx.story) return ctx.response.notFound();
 
-    const version = ctx.version;
-    const story = ctx.story;
-
-    const service = new IndexService(story);
-    const index = await service.getItems(version);
+    const indexService = new IndexService(ctx.story);
+    const index = await indexService.getItems(ctx.version);
     const number = index.length + 1;
+    if (index.length >= ctx.story.chapterLimit) return ctx.response.redirect('/');
 
-    if (index.length >= story.chapterLimit) return ctx.response.redirect('/');
+    const service = new DraftService(ctx.story);
 
-    const bundle = service.getDefaultStoryBundle(story.fields);
+    // TODO: set any story-specific fields here
+    service.setPrefilledFields([
+      'imageUrl',
+      'type',
+    ]);
+    const bundle = await service.getDraftBundle(ctx.version, number);
+    if (bundle === null) return ctx.response.redirect('/');
 
     await Draft.create({
-      ...version,
+      ...ctx.version,
       number,
       bundle,
     });
