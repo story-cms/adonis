@@ -14,10 +14,9 @@ export default class DraftsController {
     const story = ctx.story;
 
     const service = new IndexService(story);
-    const index = await service.getItems(version);
-    const number = index.length + 1;
+    const number = await service.getNewChapterNumber(version);
 
-    if (index.length >= story.chapterLimit) return ctx.response.redirect('/');
+    if (number >= story.chapterLimit) return ctx.response.redirect('/');
 
     const bundle = service.getDefaultStoryBundle(story.fields);
 

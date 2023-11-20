@@ -74,7 +74,22 @@ export default class IndexService {
     });
   }
 
-  public async getIndex(version: Version): Promise<any[]> {
+  public async getNewChapterNumber(version: Version): Promise<number> {
+    await this.buildIndex(version);
+
+    const index = await Index.query().where(version).first();
+    if (!index) return 1;
+
+    let next = 1;
+    while (index.list.some((item) => item.number === next)) {
+      next += 1;
+    }
+    if (next < index.list.length + 1) return next;
+
+    return index.list.length + 1;
+  }
+
+  public async getItems(version: Version): Promise<Array<IndexReadyItem>> {
     const index = await Index.query().where(version).firstOrFail();
 
     if (!index) return [];
