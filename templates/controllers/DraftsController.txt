@@ -11,12 +11,10 @@ export default class DraftsController {
   public async create(ctx: HttpContextContract) {
     if (!ctx.version || !ctx.story) return ctx.response.notFound();
 
-    const indexService = new IndexService(ctx.story);
-    const index = await indexService.getItems(ctx.version);
-    const number = index.length + 1;
-    if (index.length >= ctx.story.chapterLimit) return ctx.response.redirect('/');
-
     const service = new DraftService(ctx.story);
+    const number = await service.getNewChapterNumber(ctx.version);
+
+    if (number >= ctx.story.chapterLimit) return ctx.response.redirect('/');
 
     // TODO: set any story-specific fields here
     service.setPrefilledFields([
