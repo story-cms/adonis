@@ -1,7 +1,7 @@
 import Chapter from 'App/Models/Chapter';
 import Draft from 'App/Models/Draft';
 import Index from 'App/Models/Index';
-import { IndexItem, Version, IndexReadyItem, Story, Part } from '@story-cms/ui';
+import { IndexItem, Version, IndexReadyItem, Story, Part, AddStatus } from '@story-cms/ui';
 
 export default class IndexService {
   public story: Story;
@@ -73,6 +73,33 @@ export default class IndexService {
       };
     });
   }
+
+
+  public async getAddStatus(version: Version): Promise<AddStatus> {
+    const index = await this.getItems(version);
+
+    if (index.length >= this.story.chapterLimit) return AddStatus.Full;
+
+    // We have not reached the limit for the number of chapters and we're not a translation
+    if (version.locale == storyConfig.languages[0].locale) {
+      return AddStatus.Add;
+    }
+
+    const number = index.length + 1;
+
+    const specifier = {
+      apiVersion: version.apiVersion,
+      locale: storyConfig.languages[0].locale,
+      storyId: this.story.id,
+      number: number,
+    };
+
+    const source = await Chapter.query().where(specifier).first();
+
+    if (!source) return AddStatus.Wait;
+    return AddStatus.Add;
+  }
+
 
   public async getNewChapterNumber(version: Version): Promise<number> {
     await this.buildIndex(version);

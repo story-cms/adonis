@@ -2,6 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { schema } from '@ioc:Adonis/Core/Validator';
 import IndexService from 'App/Services/IndexService';
 import { storyConfig } from 'Config/story';
+import { DashboardProps, AddStatus } from '@story-cms/ui';
 
 export default class DashboardController {
   public async index(ctx: HttpContextContract) {
@@ -11,11 +12,12 @@ export default class DashboardController {
     const story = ctx.story;
 
     const service = new IndexService(story);
-    const index = await service.getItems(version);
-    const isComplete = index.length >= story.chapterLimit;
-    const props = { index, isComplete };
 
-    return ctx.inertia.render('DashboardIndex', props);
+    const addStatus: AddStatus = await service.getAddStatus(ctx.version);
+    const index = await service.getItems(version);
+    const props: DashboardProps = { index, addStatus };
+
+    return ctx.inertia.render('DashboardIndex', { ...props });
   }
 
   public async poke({ inertia }: HttpContextContract) {
