@@ -2,17 +2,18 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import User from 'App/Models/User';
 import Logger from '@ioc:Adonis/Core/Logger';
-import { storyConfig } from 'Config/story';
-import { LanguageSpecification } from '@story-cms/ui';
+import { UsersProps } from '@story-cms/ui';
 
 export default class UsersController {
   // show a list of all users
   public async index({ inertia, auth }: HttpContextContract) {
     const users = await User.all();
+    const props: UsersProps = {
+      users: users.map((user) => user.meta),
+    };
+
     return inertia.render('UsersIndex', {
-      user: auth.user,
-      users: users,
-      allLanguages: storyConfig.languages.map((lang) => lang as LanguageSpecification),
+      ...props,
     });
   }
 
