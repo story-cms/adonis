@@ -1,7 +1,15 @@
 import Chapter from 'App/Models/Chapter';
 import Draft from 'App/Models/Draft';
 import Index from 'App/Models/Index';
-import { IndexItem, Version, IndexReadyItem, Story, Part, AddStatus } from '@story-cms/ui';
+import {
+  IndexItem,
+  Version,
+  IndexReadyItem,
+  Story,
+  Part,
+  AddStatus,
+} from '@story-cms/ui';
+import { storyConfig } from 'Config/story';
 
 export default class IndexService {
   public story: Story;
