@@ -4,4 +4,5 @@ declare module '@story-cms/ui' {
   export interface IndexItem {}
   export interface Specifier {}
   export interface FieldSpec {}
+  export interface Meta {}
 }
