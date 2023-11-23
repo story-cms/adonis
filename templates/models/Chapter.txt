@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
-import { IndexItem, Specifier } from '@story-cms/ui';
+import { IndexItem, Specifier, ChapterMeta } from '@story-cms/ui';
 
 export default class Chapter extends BaseModel {
   @column({ isPrimary: true })
@@ -44,6 +44,14 @@ export default class Chapter extends BaseModel {
       locale: this.locale,
       number: this.number,
       storyId: this.storyId,
+    };
+  }
+
+  public get meta(): ChapterMeta {
+    return {
+      number: this.number,
+      createdAt: this.createdAt.toString(),
+      updatedAt: this.updatedAt.toString(),
     };
   }
 }

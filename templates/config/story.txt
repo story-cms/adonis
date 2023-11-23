@@ -26,11 +26,9 @@ export const storyConfig: StoryConfig = {
     chapterType: '{{chapterType}}',
     logo: '{{logoUrl}}',
     helpUrl: '{{helpUrl}}',
+    hasEditReview: false,
+    hasAppPreview: false,
   },
-
-  hasEditReview: false,
-
-  hasAppPreview: false,
 
   // https://en.wikipedia.org/wiki/IETF_language_tag
   // https://r12a.github.io/app-subtags/
@@ -39,6 +37,7 @@ export const storyConfig: StoryConfig = {
       locale: 'en',
       language: 'English',
       languageDirection: 'ltr',
+      bibleVersion: '3e2eb613d45e131e-01',
     },
   ],
 

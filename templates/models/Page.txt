@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
+import { PageMeta } from '@story-cms/ui';
 
 export default class Page extends BaseModel {
   @column({ isPrimary: true })
@@ -82,6 +83,14 @@ export default class Page extends BaseModel {
     bundle.body = `${bundle.body}${glue}${tracking}`;
     return bundle;
   }
+
+  public get meta(): PageMeta {
+    return {
+      id: this.id,
+      createdAt: this.createdAt.toString(),
+      updatedAt: this.updatedAt.toString(),
+    };
+  }  
 }
 
 export interface PageVersion {

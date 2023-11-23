@@ -1,9 +1,8 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import Chapter from 'App/Models/Chapter';
-import { storyConfig } from 'Config/story';
-import ChapterService from 'App/Services/ChapterService';
 import marked from 'marked';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import View from '@ioc:Adonis/Core/View';
+import Chapter from 'App/Models/Chapter';
+import { PreviewProps } from '@story-cms/ui';
 
 export default class ChaptersController {
   public async preview(ctx: HttpContextContract) {

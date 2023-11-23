@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
-import { IndexItem, Specifier, Version } from '@story-cms/ui';
+import { IndexItem, Specifier, Version, DraftMeta } from '@story-cms/ui';
+
 export default class Draft extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
@@ -56,6 +57,16 @@ export default class Draft extends BaseModel {
       storyId: this.storyId,
       locale: this.locale,
       apiVersion: this.apiVersion,
+    };
+  }
+
+  public get meta(): DraftMeta {
+    return {
+      id: this.id,
+      number: this.number,
+      status: this.status,
+      updatedAt: this.updatedAt.toString(),
+      createdAt: this.createdAt.toString(),
     };
   }
 }
