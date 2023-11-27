@@ -17,7 +17,7 @@ export default class AuthController {
 
     try {
       await auth.attempt(payload.email, payload.password, payload.remember);
-      //   session.put('locale', auth.user!.defaultLanguage());
+      session.put('locale', auth.user!.defaultLanguage());
       response.redirect('/');
     } catch {
       session.flash('errors', { credentials: 'Invalid username or password' });
@@ -25,9 +25,9 @@ export default class AuthController {
     }
   }
 
-  public async logout({ auth, response }: HttpContextContract) {
-    // session.forget('locale');
-    await auth.logout();
-    response.redirect('/login');
+  public async logout(ctx: HttpContextContract) {
+    ctx.session.clear();
+    await ctx.auth.logout();
+    ctx.response.redirect('/login');
   }
 }
