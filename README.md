@@ -12,6 +12,14 @@ This library depends on three `AdonisJS` core libraries: `@adonisjs/auth`,
 ```shell
 # NPM
 npm i @story-cms/adonis
+```
+Create a migrations directory if it doesn't exist.
+
+```shell
+mkdir -p database/migrations
+```
+
+```shell
 node ace configure @story-cms/adonis
 node ace migration:run
 ```
