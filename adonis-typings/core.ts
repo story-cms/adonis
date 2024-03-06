@@ -1,17 +1,8 @@
 declare module '@ioc:StoryCms/Core' {
-  import type { Specifier, FieldSpec } from '@story-cms/ui';
+  import type { Specifier, FieldSpec, Meta } from '@story-cms/ui';
 
   export type StoryConfig = {
-    meta: {
-      name: string;
-      logo: string;
-      storyType: string;
-      chapterType: string;
-      helpUrl?: string;
-      microCopySource?: string;
-      hasEditReview: boolean;
-      hasAppPreview: boolean;
-    };
+    meta: Meta;
     languages: {
       locale: string;
       language: string;
