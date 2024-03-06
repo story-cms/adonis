@@ -7,6 +7,7 @@ declare module '@ioc:StoryCms/Core' {
       storyType: string;
       chapterType: string;
       helpUrl: string;
+      microCopySource: string;
       logo: string;
     };
     hasEditReview: boolean;
