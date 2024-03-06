@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { UiService, UiValidationError } from 'App/Services/UiService';
-import { UiPageProps } from 'App/UiHelpers';
+import { UiPageProps } from '@story-cms/ui';
 import { storyConfig } from 'Config/story';
 
 export default class UisController {
