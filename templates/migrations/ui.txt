@@ -1,0 +1,33 @@
+import BaseSchema from '@ioc:Adonis/Lucid/Schema';
+
+export default class extends BaseSchema {
+  public async up() {
+    this.schema.createTable('uis', (table) => {
+      table.increments('id');
+
+      table.string('locale').notNullable();
+      table.string('key').notNullable();
+      table.string('micro_copy').notNullable();
+
+      table.timestamp('created_at', { useTz: true });
+      table.timestamp('updated_at', { useTz: true });
+    });
+
+    this.schema.createTable('ui_attributes', (table) => {
+      table.increments('id');
+
+      table.string('key').notNullable();
+      table.string('description');
+      table
+        .jsonb('placeholders')
+        .comment(
+          'https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#placeholder-in-resource',
+        );
+    });
+  }
+
+  public async down() {
+    this.schema.dropTable('uis');
+    this.schema.dropTable('ui_attributes');
+  }
+}

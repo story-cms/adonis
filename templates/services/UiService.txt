@@ -5,7 +5,7 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import { UiItem, UiProgress } from '@story-cms/ui';
 import { storyConfig } from 'Config/story';
 
-const sourcePath = storyConfig.meta.microCopySource;
+const sourcePath = storyConfig.meta.microCopySource as string;
 
 export class UiValidationError extends Error {
   public messages: Record<string, string>;
