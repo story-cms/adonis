@@ -11,13 +11,13 @@ import { StoryConfig } from '@ioc:StoryCms/Core';
 | Story
 |--------------------------------------------------------------------------
 |
-| This is the main configuration for the CMS instance where we define 
+| This is the main configuration for the CMS instance where we define
 | the following things:
 |
 | - site meta data
 | - content shape
 | - infomation pages
-| 
+|
 */
 export const storyConfig: StoryConfig = {
    meta: {
@@ -26,6 +26,7 @@ export const storyConfig: StoryConfig = {
     chapterType: '{{chapterType}}',
     logo: '{{logoUrl}}',
     helpUrl: '{{helpUrl}}',
+    microCopySource: '{{microCopySource}}'
   },
 
   hasEditReview: false,

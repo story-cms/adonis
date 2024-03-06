@@ -10,6 +10,7 @@ type InstructionsState = {
   chapterType: string;
   logoUrl: string;
   helpUrl: string;
+  microCopySource: string;
   hasEditReview: boolean;
   hasAppPreview: boolean;
 };
@@ -26,6 +27,8 @@ export default async function instructions(
     logoUrl:
       'https://res.cloudinary.com/onesheep/image/upload/v1686316788/cmsplayground/bsivel4ubfkzdep51psi.svg',
     helpUrl: 'https://www.markdownguide.org',
+    microCopySource:
+      'https://raw.githubusercontent.com/partner_organization/partner_project/main/lib/src/localization/app_en.arb',
     hasEditReview: false,
     hasAppPreview: false,
   };
@@ -64,6 +67,15 @@ export default async function instructions(
       return !!view.length || 'This cannot be left empty';
     },
   });
+
+  state.microCopySource = await sink
+    .getPrompt()
+    .ask('Enter the url where the micro copy can be pulled from', {
+      default: state.microCopySource,
+      validate() {
+        return true;
+      },
+    });
 
   makeConfig(projectRoot, app, sink, state);
   makeModels(projectRoot, app, sink);
