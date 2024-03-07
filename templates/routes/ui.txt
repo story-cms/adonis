@@ -1,0 +1,6 @@
+import Route from '@ioc:Adonis/Core/Route';
+
+Route.get('/ui', 'UiController.index').middleware('auth');
+Route.post('/ui', 'UiController.store').middleware('auth');
+Route.get('/pull', 'UiController.pull').prefix('/ui/v1');
+Route.get('/translation', 'UiController.translation').prefix('/ui/v1');

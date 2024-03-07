@@ -26,3 +26,4 @@ import './routes/pages';
 import './routes/users';
 import './routes/api';
 import './routes/admin';
+import './routes/ui';
