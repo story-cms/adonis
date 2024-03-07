@@ -1,22 +1,20 @@
-import { DateTime } from 'luxon';
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
 
-export default class Ui extends BaseModel {
+export default class UiAttribute extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
-
-  @column()
-  public locale: string;
 
   @column()
   public key: string;
 
   @column()
-  public microCopy: string;
+  public description: string;
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime;
+  @column()
+  public placeholders: string;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime;
+  public get placeholdersArray(): string[] {
+    if (!this.placeholders) return [];
+    return Object.keys(this.placeholders);
+  }
 }
