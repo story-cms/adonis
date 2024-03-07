@@ -15,7 +15,7 @@ export default class DashboardController {
 
     const addStatus: AddStatus = await service.getAddStatus(ctx.version);
     const index = await service.getItems(version);
-    const props: DashboardProps = { index, addStatus };
+    const props: DashboardProps = { index, addStatus, storyName: story.name };
 
     return ctx.inertia.render('DashboardIndex', { ...props });
   }
