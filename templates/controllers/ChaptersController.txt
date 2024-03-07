@@ -1,15 +1,15 @@
+import marked from 'marked';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import Chapter from 'App/Models/Chapter';
-import { storyConfig } from 'Config/story';
-import ChapterService from 'App/Services/ChapterService';
 import View from '@ioc:Adonis/Core/View';
+import Chapter from 'App/Models/Chapter';
+import { PreviewProps } from '@story-cms/ui';
 
 export default class ChaptersController {
   public async preview(ctx: HttpContextContract) {
     if (!ctx.version || !ctx.story) return ctx.response.notFound();
 
-    const version = ctx.version;
-    const story = ctx.story;
+    const version = ctx.version!;
+    const story = ctx.story!;
 
     const specifier = {
       apiVersion: version.apiVersion,
@@ -17,16 +17,21 @@ export default class ChaptersController {
       storyId: story.id,
       number: Number(ctx.params.number),
     };
+
     const chapter = await Chapter.query().where(specifier).firstOrFail();
     const bundleView = await View.render('preview', {
       bundle: chapter.bundle,
+      marked: marked,
     });
 
-    return ctx.inertia.render('ChapterPreview', {
-      chapter: chapter,
+    const props: PreviewProps = {
+      chapter: chapter.meta,
       bundleView: bundleView,
-    });
+    };
+
+    return ctx.inertia.render('ChapterPreview', { ...props });
   }
+
 
   public async get(ctx: HttpContextContract) {
     if (!ctx.version || !ctx.story) return ctx.response.notFound();

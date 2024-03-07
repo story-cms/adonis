@@ -1,17 +1,6 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm';
-
-interface IndexItem {
-  number: number;
-  imageUrl: string;
-  title: string;
-  reference: string;
-  part: number;
-}
-
-interface IndexItems {
-  root: Array<IndexItem>;
-}
+import { IndexItems } from '@story-cms/ui';
 
 export default class Index extends BaseModel {
   @column({ isPrimary: true })

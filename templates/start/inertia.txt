@@ -10,8 +10,7 @@
 
 import Inertia from '@ioc:EidelLev/Inertia';
 import { storyConfig } from 'Config/story';
-import secrets from 'Config/secrets';
-import { Story, LanguageSpecification } from '@story-cms/ui';
+import { LanguageSpecification } from '@story-cms/ui';
 
 const getLanguage = (locale: string | null): LanguageSpecification => {
   const found =
@@ -20,22 +19,22 @@ const getLanguage = (locale: string | null): LanguageSpecification => {
   return found as LanguageSpecification;
 };
 
-const getStory = (id: number | null): Story => {
-  const found = storyConfig.stories.find((s) => s.id === id);
-  return found ?? storyConfig.stories[0];
-};
-
-const isLoggedIn = (ctx: any): boolean => ctx.auth.use('web').isLoggedIn;
-
 Inertia.share({
   errors: (ctx) => {
-    return ctx.session.flashMessages.get('errors');
+    return ctx.session.flashMessages.get('errors') || {};
   },
   meta: () => storyConfig.meta,
-  language: (ctx) => getLanguage(ctx.session.get('locale')),
-  languages: () => storyConfig.languages.map((lang) => lang.language),
-  storyName: (ctx) => getStory(ctx.session.get('storyId')).name,
+  languages: () => storyConfig.languages,
   stories: () => storyConfig.stories.map((item) => item.name),
+  language: (ctx) => getLanguage(ctx.session.get('locale')),
   user: (ctx) => ctx.auth.use('web').user,
-  secrets: (ctx) => (isLoggedIn(ctx) ? secrets : null),
 });
+
+// interface SharedPageProps {
+//   errors?: any;
+//   meta: Meta;
+//   language: LanguageSpecification;
+//   languages: LanguageSpecification[];
+//   stories: string[];
+//   user: User;
+// }

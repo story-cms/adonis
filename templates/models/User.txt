@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import Hash from '@ioc:Adonis/Core/Hash';
 import { column, beforeSave, BaseModel, computed } from '@ioc:Adonis/Lucid/Orm';
+import { UserMeta } from '@story-cms/ui';
 
 export default class User extends BaseModel {
   public static roles = ['admin', 'editor'] as const;
@@ -71,5 +72,16 @@ export default class User extends BaseModel {
     if (parts.length === 1) return parts[0];
     if (parts.length === 2) return `${parts[0]}${parts[1]}`;
     return `${parts[0]}${parts[parts.length - 1]}`;
+  }
+
+  @computed()
+  public get meta(): UserMeta {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      role: this.role,
+      language: this.language || 'en',
+    };
   }
 }

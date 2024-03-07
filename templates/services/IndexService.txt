@@ -1,7 +1,15 @@
 import Chapter from 'App/Models/Chapter';
 import Draft from 'App/Models/Draft';
 import Index from 'App/Models/Index';
-import { IndexItem, Version, IndexReadyItem, Story, Part } from '@story-cms/ui';
+import {
+  IndexItem,
+  Version,
+  IndexReadyItem,
+  Story,
+  Part,
+  AddStatus,
+} from '@story-cms/ui';
+import { storyConfig } from 'Config/story';
 
 export default class IndexService {
   public story: Story;
@@ -74,6 +82,33 @@ export default class IndexService {
     });
   }
 
+
+  public async getAddStatus(version: Version): Promise<AddStatus> {
+    const index = await this.getItems(version);
+
+    if (index.length >= this.story.chapterLimit) return AddStatus.Full;
+
+    // We have not reached the limit for the number of chapters and we're not a translation
+    if (version.locale == storyConfig.languages[0].locale) {
+      return AddStatus.Add;
+    }
+
+    const number = index.length + 1;
+
+    const specifier = {
+      apiVersion: version.apiVersion,
+      locale: storyConfig.languages[0].locale,
+      storyId: this.story.id,
+      number: number,
+    };
+
+    const source = await Chapter.query().where(specifier).first();
+
+    if (!source) return AddStatus.Wait;
+    return AddStatus.Add;
+  }
+
+
   public async getNewChapterNumber(version: Version): Promise<number> {
     await this.buildIndex(version);
 
@@ -89,7 +124,7 @@ export default class IndexService {
     return index.list.length + 1;
   }
 
-  public async getItems(version: Version): Promise<Array<IndexReadyItem>> {
+  public async groupedIndex(version: Version): Promise<any[]> {
     const index = await Index.query().where(version).firstOrFail();
 
     if (!index) return [];
@@ -127,45 +162,5 @@ export default class IndexService {
   public async getCurrentApiVersion(): Promise<number> {
     const rows = await Chapter.query().max('api_version');
     return rows[0].$extras.max || 1;
-  }
-
-  public getDefaultStoryBundle(spec: Object[]): string {
-    const shapes = this.getBundleShapes(spec);
-    return `{${shapes}}`;
-  }
-
-  private getBundleShapes(spec: Object[]): string {
-    return (
-      spec
-        // .filter((widget) => widget.hasOwnProperty('name'))
-        .map((node) => {
-          return this.renderBundleShape(node);
-        })
-        .join(',')
-    );
-  }
-
-  private renderBundleShape(node: any): string {
-    if (node['widget'] === 'panel' && node['fields'])
-      return this.getBundleShapes(node['fields']);
-
-    if (node['widget'] === 'list' && node['fields']) return `"${node['name']}": []`;
-    // if (node['widget'] === 'list' && node['field']) return `TODO`;
-    if (node['widget'] === 'string') return `"${node['name']}": ""`;
-    if (node['widget'] === 'image') return `"${node['name']}": ""`;
-    if (node['widget'] === 'object')
-      return `"${node['name']}": ${this.renderObjectShape(node['fields'])}`;
-
-    return `"${node['name']}": ""`;
-  }
-
-  private renderObjectShape(node: any): string {
-    const items = Object.entries(node)
-      .map(([_, value]) => {
-        return this.renderBundleShape(value);
-      })
-      .join(',');
-
-    return `{${items}}`;
   }
 }

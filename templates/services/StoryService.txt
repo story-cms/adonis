@@ -1,53 +1,35 @@
 import { storyConfig } from 'Config/story';
-import { StorySpec, ImageProvider, Story, Providers } from '@story-cms/ui';
-import Env from '@ioc:Adonis/Core/Env';
+import { StorySpec, Story } from '@story-cms/ui';
 
 export default class StoryService {
   public story: Story;
   public config: Object;
-  private _spec: StorySpec;
 
   constructor(story: Story) {
     this.config = storyConfig;
     this.story = story;
   }
 
-  public static providers: Providers = {
-    s3Target: {
-      bucket: Env.get('S3_BUCKET'),
-      region: Env.get('S3_REGION'),
-      endpoint: Env.get('S3_ENDPOINT'),
-    },
-    imageProvider: {
-      cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
-      defaultPreset: Env.get('CLOUDINARY_PRESET'),
-    },
-  };
+  // factory methods
+  public static fromId(id: number): StoryService | undefined {
+    const story = storyConfig.stories.find((s) => s.id === id);
+    if (!story) return undefined;
 
-  public get spec(): StorySpec {
-    if (this._spec !== undefined) return this._spec;
-    this._spec = {
-      chapterLimit: this.story.chapterLimit,
-      hasEditReview: this.config['hasEditReview'],
-      hasAppPreview: this.config['hasAppPreview'],
-      fields: this.decoratedSpec(this.story['fields']),
-    };
-    return this._spec;
+    return new StoryService(story);
   }
 
-  private decoratedSpec(node: Object[]): Object[] {
-    return node.map((n) => {
-      if (n['widget'] === 'list' || n['widget'] === 'panel')
-        return { ...n, fields: this.decoratedSpec(n['fields']) };
-      if (n['widget'] === 'object') return n; // can't walk an object just yet
-      if (n['widget'] === 'image' || n['widget'] === 'animation') {
-        const imageProvider: ImageProvider = {
-          defaultPreset: '',
-          cloudName: Env.get('CLOUDINARY_CLOUD_NAME'),
-        };
-        return { ...n, provider: imageProvider };
-      }
-      return n;
-    });
+  public static fromName(name: string): StoryService | undefined {
+    const story = storyConfig.stories.find((s) => s.name === name);
+    if (!story) return undefined;
+
+    return new StoryService(story);
+  }
+
+  public get spec(): StorySpec {
+    return {
+      name: this.story.name,
+      chapterLimit: this.story.chapterLimit,
+      fields: this.story['fields'],
+    };
   }
 }

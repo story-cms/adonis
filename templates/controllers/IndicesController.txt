@@ -6,7 +6,7 @@ export default class IndicesController {
     if (!ctx.version || !ctx.story) return ctx.response.notFound();
 
     const service = new IndexService(ctx.story);
-    const idx = await service.getIndex(ctx.version);
+    const idx = await service.groupIndex(ctx.version);
     return {
       index: idx,
     };

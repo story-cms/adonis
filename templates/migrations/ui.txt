@@ -7,7 +7,7 @@ export default class extends BaseSchema {
 
       table.string('locale').notNullable();
       table.string('key').notNullable();
-      table.string('micro_copy').notNullable();
+      table.text('micro_copy').notNullable();
 
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });

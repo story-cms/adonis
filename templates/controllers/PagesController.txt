@@ -2,9 +2,10 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Page, { PageVersion } from 'App/Models/Page';
 import { storyConfig } from 'Config/story';
 import PageService from 'App/Services/PageService';
-import StoryService from 'App/Services/StoryService';
 import PageValidator from 'App/Validators/PageValidator';
 import { SessionContract } from '@ioc:Adonis/Addons/Session';
+import providers from 'Config/providers';
+import { PageEditProps } from '@story-cms/ui';
 
 export default class PagesController {
   public async get({ request }: HttpContextContract) {
@@ -19,25 +20,25 @@ export default class PagesController {
     return { pages: items };
   }
 
-  public async index({ inertia, auth, session }: HttpContextContract) {
+  public async index({ inertia, session }: HttpContextContract) {
     const version = versionFromSession(session);
     const service = new PageService(version);
     const pages = await service.getPageItems();
     return inertia.render('PagesIndex', {
-      user: auth.user,
       pages: pages,
     });
   }
 
-  public async edit({ inertia, params, auth }: HttpContextContract) {
+  public async edit({ inertia, params }: HttpContextContract) {
     const page = await Page.findOrFail(params.id);
 
-    return inertia.render('PagesEdit', {
-      user: auth.user,
-      providers: StoryService.providers,
-      page: page,
+    const props: PageEditProps = {
+      providers: providers,
+      page: page.meta,
       bundle: page.model,
-    });
+    };
+
+    return inertia.render('PagesEdit', { ...props });
   }
 
   public async create({ response, session, auth }: HttpContextContract) {

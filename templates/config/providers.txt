@@ -1,0 +1,21 @@
+import Env from '@ioc:Adonis/Core/Env';
+import { Providers } from '@story-cms/ui';
+
+export default {
+  s3: {
+    accessKeyId: Env.get('S3_ACCESS_KEY_ID', ''),
+    accessKey: Env.get('S3_SECRET_ACCESS_KEY', ''),
+    bucket: Env.get('S3_BUCKET', ''),
+    region: Env.get('S3_REGION', ''),
+    endpoint: Env.get('S3_ENDPOINT', ''),
+  },
+  cloudinary: {
+    apiKey: Env.get('CLOUDINARY_API_KEY', ''),
+    secret: Env.get('CLOUDINARY_SECRET', ''),
+    cloudName: Env.get('CLOUDINARY_CLOUD_NAME', ''),
+    defaultPreset: Env.get('CLOUDINARY_PRESET', ''),
+  },
+  scripture: {
+    bibleApiKey: Env.get('BIBLE_API_KEY', ''),
+  },
+} as Providers;
